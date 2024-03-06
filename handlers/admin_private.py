@@ -6,7 +6,8 @@ from aiogram.fsm.context import FSMContext
 from dotenv import find_dotenv, load_dotenv
 from aiogram.fsm.state import StatesGroup, State
 
-from keyboards.reply import start_kb, del_keyboard, history_kb, subj_kb
+from database.orm_query import orm_add_task
+from keyboards.reply import start_kb, del_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task
 
@@ -17,7 +18,7 @@ admin = int(os.getenv('ADMIN_ID'))
 
 
 
-class Tasks(StatesGroup):
+class Tasks_state(StatesGroup):
     subj = State()
     exam = State()
     chapter = State()
@@ -25,18 +26,18 @@ class Tasks(StatesGroup):
     answer_mode = State()
     answer = State()
     texts = {
-        'Tasks:subj': 'Введите предмет заново',
-        'Tasks:exam': 'Введите экзамен заново',
-        'Tasks:chapter': 'Введите главу заново',
-        'Tasks:description': 'Введите описание задания заново',
-        'Tasks:answer_mode': 'Введите режим ответа заново',
+        'Tasks_state:subj': 'Введите предмет заново',
+        'Tasks_state:exam': 'Введите экзамен заново',
+        'Tasks_state:chapter': 'Введите главу заново',
+        'Tasks_state:description': 'Введите описание задания заново',
+        'Tasks_state:answer_mode': 'Введите режим ответа заново',
     }
 
 
 @admin_private_router.message(StateFilter(None), F.text == 'Добавить задание')
-async def fill_Tasks(message: types.Message, state: FSMContext):
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await message.answer('Привет админ) \nВведите предмет', reply_markup=del_keyboard)
-    await state.set_state(Tasks.subj)
+    await state.set_state(Tasks_state.subj)
 
 
 @admin_private_router.message(StateFilter('*'), Command("назад"))
@@ -44,22 +45,22 @@ async def fill_Tasks(message: types.Message, state: FSMContext):
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
 
-    if current_state == Tasks.subj:
+    if current_state == Tasks_state.subj:
         await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"')
         return
 
     previous = None
-    for step in Tasks.__all_states__:
+    for step in Tasks_state.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
-            await message.answer(f"Ок, вы вернулись к прошлому шагу \n{Tasks.texts[previous.state]}")
+            await message.answer(f"Ок, вы вернулись к прошлому шагу \n{Tasks_state.texts[previous.state]}")
             return
         previous = step
 
 
 @admin_private_router.message(StateFilter('*'), Command('отмена'))
 @admin_private_router.message(StateFilter('*'), F.text.casefold() == 'отмена')
-async def fill_Tasks(message: types.Message, state: FSMContext):
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
@@ -67,55 +68,53 @@ async def fill_Tasks(message: types.Message, state: FSMContext):
     await message.answer('Действия отменены')
 
 
-@admin_private_router.message(Tasks.subj, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext):
+@admin_private_router.message(Tasks_state.subj, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await state.update_data(subj=message.text)
     await message.answer('Введите экзамен')
-    await state.set_state(Tasks.exam)
+    await state.set_state(Tasks_state.exam)
 
 
-@admin_private_router.message(Tasks.exam, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext):
+@admin_private_router.message(Tasks_state.exam, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await state.update_data(exam=message.text)
     await message.answer('Введите главу')
-    await state.set_state(Tasks.chapter)
+    await state.set_state(Tasks_state.chapter)
 
 
-@admin_private_router.message(Tasks.chapter, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext):
+@admin_private_router.message(Tasks_state.chapter, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await state.update_data(chapter=message.text)
     await message.answer('Введите описание')
-    await state.set_state(Tasks.description)
+    await state.set_state(Tasks_state.description)
 
 
-@admin_private_router.message(Tasks.description, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext):
+@admin_private_router.message(Tasks_state.description, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await state.update_data(description=message.text)
     await message.answer('Введите режим ответа\n1 - цифра\n2 - слова')
-    await state.set_state(Tasks.answer_mode)
+    await state.set_state(Tasks_state.answer_mode)
 
 
-@admin_private_router.message(Tasks.answer_mode, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext):
+@admin_private_router.message(Tasks_state.answer_mode, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext):
     await state.update_data(answer_mode=message.text)
     await message.answer('Введите ответ')
-    await state.set_state(Tasks.answer)
+    await state.set_state(Tasks_state.answer)
 
 
-@admin_private_router.message(Tasks.answer, F.text)
-async def fill_Tasks(message: types.Message, state: FSMContext, session: AsyncSession):
+@admin_private_router.message(Tasks_state.answer, F.text)
+async def fill_Tasks_state(message: types.Message, state: FSMContext, session: AsyncSession):
     await state.update_data(answer=message.text)
-    await message.answer('Задание добавлено')
     data = await state.get_data()
-    obj = Task(
-        subj=data['subj'],
-        exam=data['exam'],
-        chapter=data['chapter'],
-        description=data['description'],
-        answer_mode=data['answer_mode'],
-        answer=data['answer']
-    )
-    session.add(obj)
-    await session.commit()
-    await message.answer(str(data))
+    try:
+        await orm_add_task(session, data)
+        await message.answer('Задание добавлено')
+    except Exception as e:
+        await message.answer(
+            f'Ошибка: \n{str(e)}'
+        )
     await state.clear()
+
+
+
