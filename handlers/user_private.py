@@ -4,25 +4,26 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 from database.orm_query import orm_get_chapters
-from keyboards.reply import start_kb, chapters_kb, prepare_kb
+from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
 
-list_sort = {'История ОГЭ', 'Общество ОГЭ', 'Общество ЕГЭ', 'История ЕГЭ'}
-
 
 class UserState(StatesGroup):
+    start_choose = State()
     subj_choose = State()
     chapter_choose = State()
     prepare_choose = State()
     texts = {
+        'UserState:start_choose': 'Начало работы',
         'UserState:subj_choose': 'Выбираем предметы',
         'UserState:chapter_choose': 'Выбор главы',
         'UserState:prepare_choose': 'Выбрана подготовка',
     }
     kb = {
-        'Выбираем предметы': start_kb,
+        'Начало работы': start_kb,
+        'Выбираем предметы': subj_kb,
         'Выбор главы': chapters_kb,
         'Выбрана подготовка': prepare_kb,
     }
@@ -32,7 +33,7 @@ class UserState(StatesGroup):
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message, state: FSMContext):
     await message.answer('Вы запустили бота', reply_markup=start_kb())
-    await state.set_state(UserState.subj_choose)
+    await state.set_state(UserState.start_choose)
     UserState.last_kb = start_kb()
 
 
@@ -41,8 +42,9 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     print("Назад")
     current_state = await state.get_state()
 
-    if current_state == UserState.subj_choose:
-        await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"', reply_markup=start_kb())
+    if current_state == UserState.start_choose:
+        await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"',
+                             reply_markup=start_kb())
         return
 
     previous = None
@@ -51,19 +53,8 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
             await state.set_state(previous)
             await message.answer(f"Ок, вы вернулись к прошлому шагу \n{UserState.texts[previous.state]}",
                                  reply_markup=UserState.kb[UserState.texts[previous.state]](data=UserState.last_data))
-
             return
         previous = step
-
-
-# @user_private_router.message(StateFilter('*'), Command('отмена'))
-# @user_private_router.message(StateFilter('*'), F.text.casefold() == 'отмена')
-# async def fill_Tasks_state(message: types.Message, state: FSMContext):
-#     current_state = await state.get_state()
-#     if current_state is None:
-#         return
-#     await state.clear()
-#     await message.answer('Действия отменены')
 
 
 @user_private_router.message(Command('about'))
@@ -79,6 +70,12 @@ async def payment(message: types.Message):
 @user_private_router.message(F.text, F.text.lower().contains('привет'))
 async def hello_filter(message: types.Message):
     await message.answer('Привет)')
+
+
+@user_private_router.message(UserState.start_choose)
+async def start_func(message: types.Message, session: AsyncSession, state: FSMContext):
+    await message.answer(f'Выберите вариант подготовки', reply_markup=subj_kb())
+    await state.set_state(UserState.subj_choose)
 
 
 @user_private_router.message(UserState.subj_choose)
