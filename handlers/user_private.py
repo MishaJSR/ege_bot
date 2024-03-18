@@ -119,7 +119,7 @@ async def start_filter(message: types.Message, session: AsyncSession, state: FSM
     #     return
     await message.answer(f'Выберите модуль для подготовки', reply_markup=prepare_kb())
     UserState.last_kb = subj_kb()
-    await state.set_state(UserState.prepare_choose)
+    await state.set_state(UserState.prepare_choose)#
 
 @user_private_router.message(UserState.prepare_choose, F.text == "Основная часть")
 async def start_filter(message: types.Message, session: AsyncSession, state: FSMContext):
