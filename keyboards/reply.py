@@ -1,8 +1,8 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardMarkup
 
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
-modules = ['Модуль 1', 'Модуль 2', 'Модуль 3', 'Модуль 4', 'Модуль 5']
+modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
 
 
 def get_pool(kb: ReplyKeyboardBuilder):
@@ -17,7 +17,7 @@ def start_kb(data=None):
     test_kb.button(text='Поддержка')
     pool = get_pool(test_kb)
     test_kb.adjust(2, 2)
-    return test_kb.as_markup()
+    return test_kb.as_markup(resize_keyboard=True)
 
 
 def subj_kb(data=None):
@@ -26,7 +26,7 @@ def subj_kb(data=None):
     for but in main_but:
         test_kb.button(text=but)
     test_kb.adjust(1, 2, 2)
-    return test_kb.as_markup()
+    return test_kb.as_markup(resize_keyboard=True)
 
 
 def chapters_kb(data=None):
@@ -35,18 +35,43 @@ def chapters_kb(data=None):
     for but in data:
         test_kb.button(text=but)
     test_kb.adjust(1, 1)
-    return test_kb.as_markup()
+    return test_kb.as_markup(resize_keyboard=True)
 
 
-def prepare_kb(data=None):
+def module_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Назад')
     for el in modules:
         test_kb.button(text=f'{el}')
     test_kb.adjust(1, 2)
-    return test_kb.as_markup()
+    return test_kb.as_markup(resize_keyboard=True)
 
 
+def prepare_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text='Назад')
+    test_kb.button(text='Теория')
+    test_kb.button(text='Практика')
+    test_kb.adjust(1, 2)
+    return test_kb.as_markup(resize_keyboard=True)
+
+
+def train_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text='Назад')
+    # test_kb.adjust(1, 2)
+    return test_kb.as_markup(resize_keyboard=True)
+
+
+def quiz_kb(data_mass=None, sizes: tuple[int] = (1,)):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text='Назад')
+    text_des, but_text, answer = data_mass
+    butns = but_text.split(", ")
+    for ind, el in enumerate(butns):
+        test_kb.button(text=f'{el}')
+    test_kb.adjust(1, 2)
+    return test_kb.as_markup(resize_keyboard=True)
 
 
 del_keyboard = ReplyKeyboardRemove()
