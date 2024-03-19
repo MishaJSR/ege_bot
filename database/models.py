@@ -17,6 +17,7 @@ class Task(Base):
     answers: Mapped[str] = mapped_column(Text, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     about: Mapped[str] = mapped_column(Text, nullable=True)
+    addition: Mapped[str] = mapped_column(Text, nullable=True)
 
 
 class T(Base):
@@ -28,5 +29,6 @@ class T(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     answer_mode: Mapped[str] = mapped_column(Integer, nullable=False)
     answer: Mapped[str] = mapped_column(Text, nullable=False)
+
 
 

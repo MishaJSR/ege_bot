@@ -11,7 +11,8 @@ async def orm_add_task(session: AsyncSession, data: dict):
         answer_mode=data['answer_mode'],
         answers=data['answers'],
         answer=data['answer'],
-        about=data['about']
+        about=data['about'],
+        addition=data['addition']
     )
     session.add(obj)
     await session.commit()

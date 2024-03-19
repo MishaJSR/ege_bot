@@ -47,13 +47,12 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
     await message.answer('Вы запустили бота', reply_markup=start_kb())
     # await orm_add_task(session=session, data={
     #     'exam': 'Основная часть',
-    #     'chapter': 'Человек и общество',
-    #     'description': 'Конституция РФ предусматривает защиту прав и свобод человека и гражданина. Какие из приведенных прав относятся к социальным правам?',
-    #     'answer_mode': 'Квиз',
-    #     'answers': 'право избирать и быть избранным, право на охрану здоровья, право на предпринимательскую деятельность, право на образование, право участвовать в отправлении правосудия, право на благоприятную окружающую среду',
-    #     'answer': '24',
+    #     'chapter': 'Экономика',
+    #     'description': 'Установите соответствие между примерами и видами издержек фирмы в краткосрочном периоде: к каждой позиции, данной в первом столбце, подберите соответствующую позицию из второго столбца.',
+    #     'answer_mode': 'Соответствие',
+    #     'answers': 'оклады администрации, сдельная оплата труда наёмных работников, арендная плата за помещение, приобретение сырья, проценты по кредитам',
+    #     'answer': '12121',
     #     'about': 'В соответствии с Конституцией РФ социальными правами являются право на охрану здоровья и право на образование.',
-    #
     #
     # })
     await state.set_state(UserState.start_choose)
@@ -105,14 +104,14 @@ async def start_func(message: types.Message, state: FSMContext):
 
 
 @user_private_router.message(UserState.subj_choose, F.text)
-async def start_subj_choose(message: types.Message, session: AsyncSession, state: FSMContext):
+async def start_subj_choose(message: types.Message, state: FSMContext):
     UserState.data['subj'] = message.text
     await message.answer(f'Выберите модуль для подготовки', reply_markup=module_kb())
     await state.set_state(UserState.module_choose)  #
 
 
 @user_private_router.message(UserState.module_choose)
-async def start_module_choose(message: types.Message, session: AsyncSession, state: FSMContext):
+async def start_module_choose(message: types.Message, state: FSMContext):
     UserState.data['module'] = message.text
     await message.answer(f'Выберите вариант подготовки', reply_markup=prepare_kb())
     await state.set_state(UserState.prepare_choose)
@@ -127,10 +126,13 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
                                          target_module=UserState.data['module'],
                                          target_prepare=UserState.data['prepare'])
         for task in res:
-            UserState.question_data.append([task._data[0].description,
-                                            task._data[0].answers,
-                                            task._data[0].answer,
-                                            task._data[0].about])
+            UserState.question_data.append({
+                'description': task._data[0].description,
+                'answers': task._data[0].answers,
+                'answer': task._data[0].answer,
+                'about': task._data[0].about,
+                'answer_mode': task._data[0].answer_mode,
+                'addition': task._data[0].addition})
             # chapter_but.append(fields.chapter)
     except Exception as e:
         await message.answer(
@@ -139,39 +141,52 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
     if len(UserState.question_data) == 0:
         await message.answer('Задания еще не добавлены в бота')
     else:
-        UserState.now_question = UserState.question_data[-1]
-        UserState.question_data.pop()
-        task_to_show = ''
-        task_to_show += UserState.now_question[0] + '\n' + '\n'
-        answer_arr = UserState.now_question[1].split(", ")
-        for ind, txt in enumerate(answer_arr):
-            task_to_show += f'{ind + 1}: {txt}' + '\n'
-        await message.answer(task_to_show)
-        await message.answer('Введите правильные ответы в формате 135', reply_markup=train_kb())
-        await state.set_state(UserState.train_choose)
+        await cut_stare_and_prepare_answers(message, UserState, state)
 
 
 @user_private_router.message(UserState.train_choose, F.text)
 async def start_train_choose(message: types.Message, session: AsyncSession, state: FSMContext):
-    answer_list = sorted([int(ans) for ans in str(UserState.now_question[2])])
-    answer_user = sorted([int(ans) for ans in message.text])
-    if answer_list == answer_user:
-        await message.answer(f'Правильно')
-    else:
-        await message.answer(f'Ошибка\nПравильные ответы: {str(UserState.now_question[2])}\n'
-                             f'Пояснение: {str(UserState.now_question[3])}')
-
+    await answer_checker(message, UserState)
     if len(UserState.question_data) == 0:
         await message.answer(f'Вопросы закончились', reply_markup=prepare_kb())
         await state.set_state(UserState.prepare_choose)
+    else:
+        await cut_stare_and_prepare_answers(message, UserState, state)
+
+
+async def cut_stare_and_prepare_answers(message, UserState, state):
     UserState.now_question = UserState.question_data[-1]
     UserState.question_data.pop()
     task_to_show = ''
-    task_to_show += UserState.now_question[0] + '\n' + '\n'
-    answer_arr = UserState.now_question[1].split(", ")
-    for ind, txt in enumerate(answer_arr):
-        task_to_show += f'{ind + 1}: {txt}' + '\n'
+    if UserState.now_question['answer_mode'] == "Квиз":
+        task_to_show += UserState.now_question['description'] + '\n' + '\n'
+        answer_arr = UserState.now_question['answers'].split(", ")
+        for ind, txt in enumerate(answer_arr):
+            task_to_show += f'{ind + 1}: {txt}' + '\n'
+    if UserState.now_question['answer_mode'] == "Соответствие":
+        letter_list = ['А', 'Б', 'В', 'Г', 'Д', 'Е']
+        task_to_show += UserState.now_question['description'] + '\n' + '\n'
+        answer_arr = UserState.now_question['answers'].split(", ")
+        add_arr = UserState.now_question['addition'].split(", ")
+        for ind, txt in enumerate(answer_arr):
+            task_to_show += f'{ind + 1}: {txt}' + '\n'
+        task_to_show += '\n'
+        for letter, ans in zip(letter_list, add_arr):
+            task_to_show += f'{letter}: {ans}' + '\n'
     await message.answer(task_to_show)
+    await message.answer('Введите правильные ответы в формате 135', reply_markup=train_kb())
     await state.set_state(UserState.train_choose)
 
 
+async def answer_checker(message, UserState):
+    if UserState.now_question['answer_mode'] == 'Квиз':
+        answer_user = sorted([int(ans) for ans in message.text])
+        answer_list = sorted([int(ans) for ans in str(UserState.now_question['answer'])])
+    else:
+        answer_user = [int(ans) for ans in message.text]
+        answer_list = [int(ans) for ans in str(UserState.now_question['answer'])]
+    if answer_list == answer_user:
+        await message.answer(f'Правильно')
+    else:
+        await message.answer(f'Ошибка\nПравильные ответы: {UserState.now_question["answer"]}\n'
+                             f'Пояснение: {str(UserState.now_question["about"])}')
