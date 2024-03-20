@@ -30,7 +30,7 @@ class UserState(StatesGroup):
         'prepare': None,
     }
     question_data = []
-    now_question = [[], [], []]
+    now_question = []
     last_kb = None
 
 
@@ -163,16 +163,6 @@ async def cut_stare_and_prepare_answers(message, UserState, state):
         answer_arr = UserState.now_question['answers'].split(", ")
         for ind, txt in enumerate(answer_arr):
             task_to_show += f'{ind + 1}: {txt}' + '\n'
-    if UserState.now_question['answer_mode'] == "Соответствие":
-        letter_list = ['А', 'Б', 'В', 'Г', 'Д', 'Е']
-        task_to_show += UserState.now_question['description'] + '\n' + '\n'
-        answer_arr = UserState.now_question['answers'].split(", ")
-        add_arr = UserState.now_question['addition'].split(", ")
-        for ind, txt in enumerate(answer_arr):
-            task_to_show += f'{ind + 1}: {txt}' + '\n'
-        task_to_show += '\n'
-        for letter, ans in zip(letter_list, add_arr):
-            task_to_show += f'{letter}: {ans}' + '\n'
     await message.answer(task_to_show)
     await message.answer('Введите правильные ответы в формате 135', reply_markup=train_kb())
     await state.set_state(UserState.train_choose)
