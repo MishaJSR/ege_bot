@@ -120,7 +120,7 @@ async def start_module_choose(message: types.Message, session: AsyncSession, sta
         res = await orm_get_prepare_module(session, module=UserState.data['module'], exam=UserState.data['subj'])
         UserState.data['under_prepare'] = []
         for task in res:
-            UserState.data['under_prepare'].append(task._data[0].under_chapter)
+            UserState.data['under_prepare'].append(task._data[0])
     except Exception as e:
         await message.answer(
             f'Ошибка: \n{str(e)}'

@@ -27,6 +27,6 @@ async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_m
 
 
 async def orm_get_prepare_module(session: AsyncSession, module=None, exam=None):
-    query = select(Task).where((Task.chapter == module) & (Task.exam == exam))
+    query = select(Task.under_chapter).where((Task.chapter == module) & (Task.exam == exam)).distinct()
     result = await session.execute(query)
-    return result.fetchall()
+    return result

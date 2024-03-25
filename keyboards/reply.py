@@ -53,7 +53,7 @@ def under_prepare_kb(data=None):
     test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')
     for el in data:
         test_kb.button(text=el)
-    test_kb.adjust(1, 2)
+    test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
 
 def prepare_kb(data=None):
