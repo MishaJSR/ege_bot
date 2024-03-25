@@ -47,6 +47,14 @@ def module_kb(data=None):
     return test_kb.as_markup(resize_keyboard=True)
 
 
+def under_prepare_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text='Назад')
+    for el in data:
+        test_kb.button(text=el)
+    test_kb.adjust(1, 2)
+    return test_kb.as_markup(resize_keyboard=True)
+
 def prepare_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Назад')

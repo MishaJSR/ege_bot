@@ -18,11 +18,15 @@ async def orm_add_task(session: AsyncSession, data: dict):
     await session.commit()
 
 
-async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_module=None, target_prepare=None):
+async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_module=None, target_prepare=None,
+                               target_under_prepare=None):
     if target_prepare == 'Практика':
-        query = select(Task).where((Task.exam == target_exam) & (Task.chapter == target_module))
+        query = select(Task).where((Task.exam == target_exam) & (Task.chapter == target_module) & (Task.under_chapter == target_under_prepare))
         result = await session.execute(query)
         return result.fetchall()
 
 
-
+async def orm_get_prepare_module(session: AsyncSession, module=None, exam=None):
+    query = select(Task).where((Task.chapter == module) & (Task.exam == exam))
+    result = await session.execute(query)
+    return result.fetchall()

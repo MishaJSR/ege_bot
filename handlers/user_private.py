@@ -4,8 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from database.orm_query import orm_get_modules_task, orm_add_task
-from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb, module_kb, train_kb, quiz_kb
+from database.orm_query import orm_get_modules_task, orm_add_task, orm_get_prepare_module
+from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb, module_kb, train_kb, quiz_kb, under_prepare_kb
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
@@ -15,18 +15,22 @@ class UserState(StatesGroup):
     start_choose = State()
     subj_choose = State()
     module_choose = State()
+    under_prepare_choose = State()
     prepare_choose = State()
     train_choose = State()
     texts = {
         'UserState:start_choose': ['Выберите задание', start_kb],
         'UserState:subj_choose': ['Выбираем предметы', subj_kb],
         'UserState:module_choose': ['Выбрана подготовка', module_kb],
+        'UserState:under_prepare_choose': ['Выбрана подготовка', under_prepare_kb],
         'UserState:prepare_choose': ['Выбрана подготовка', prepare_kb],
         'UserState:train_choose': ['Выбрана подготовка', train_kb],
     }
     data = {
         'subj': None,
         'module': None,
+        'under_prepare': [],
+        'under_prepare_choose': None,
         'prepare': None,
     }
     question_data = []
@@ -45,16 +49,6 @@ class UserState(StatesGroup):
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
     await message.answer('Вы запустили бота', reply_markup=start_kb())
-    # await orm_add_task(session=session, data={
-    #     'exam': 'Основная часть',
-    #     'chapter': 'Экономика',
-    #     'description': 'Установите соответствие между примерами и видами издержек фирмы в краткосрочном периоде: к каждой позиции, данной в первом столбце, подберите соответствующую позицию из второго столбца.',
-    #     'answer_mode': 'Соответствие',
-    #     'answers': 'оклады администрации, сдельная оплата труда наёмных работников, арендная плата за помещение, приобретение сырья, проценты по кредитам',
-    #     'answer': '12121',
-    #     'about': 'В соответствии с Конституцией РФ социальными правами являются право на охрану здоровья и право на образование.',
-    #
-    # })
     await state.set_state(UserState.start_choose)
     UserState.last_kb = start_kb()
 
@@ -73,7 +67,11 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     for step in UserState.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
-            await message.answer(f"Ок, вы вернулись к прошлому шагу", reply_markup=UserState.texts[previous.state][1]())
+            if previous.state == 'UserState:under_prepare_choose':
+                await message.answer(f"Ок, вы вернулись к прошлому шагу",
+                                     reply_markup=UserState.texts[previous.state][1](UserState.data['under_prepare']))
+            else:
+                await message.answer(f"Ок, вы вернулись к прошлому шагу", reply_markup=UserState.texts[previous.state][1]())
             # await message.answer(f"Ок, вы вернулись к прошлому шагу \n{UserState.texts[previous.state]}",
             #                      reply_markup=UserState.texts[previous.state][1]())
             return
@@ -111,8 +109,24 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
 
 
 @user_private_router.message(UserState.module_choose)
-async def start_module_choose(message: types.Message, state: FSMContext):
+async def start_module_choose(message: types.Message, session: AsyncSession, state: FSMContext):
     UserState.data['module'] = message.text
+    try:
+        res = await orm_get_prepare_module(session, module=UserState.data['module'], exam=UserState.data['subj'])
+        UserState.data['under_prepare'] = []
+        for task in res:
+            UserState.data['under_prepare'].append(task._data[0].under_chapter)
+    except Exception as e:
+        await message.answer(
+            f'Ошибка: \n{str(e)}'
+        )
+    await message.answer(f'Выберите вариант подготовки', reply_markup=under_prepare_kb(data=UserState.data['under_prepare']))
+    await state.set_state(UserState.under_prepare_choose)
+
+@user_private_router.message(UserState.under_prepare_choose)
+async def start_under_choose(message: types.Message, session: AsyncSession,  state: FSMContext):
+    UserState.data['under_prepare_choose'] = message.text
+
     await message.answer(f'Выберите вариант подготовки', reply_markup=prepare_kb())
     await state.set_state(UserState.prepare_choose)
 
@@ -124,7 +138,8 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
         res = await orm_get_modules_task(session,
                                          target_exam=UserState.data['subj'],
                                          target_module=UserState.data['module'],
-                                         target_prepare=UserState.data['prepare'])
+                                         target_prepare=UserState.data['prepare'],
+                                         target_under_prepare=UserState.data['under_prepare_choose'])
         for task in res:
             UserState.question_data.append({
                 'description': task._data[0].description,
