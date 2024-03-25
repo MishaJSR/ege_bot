@@ -3,4 +3,3 @@
 pycache
 venv/
 .env
-database.db
