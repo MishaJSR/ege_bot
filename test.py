@@ -22,7 +22,7 @@ def on_button_click():
     res_str = ''
     for el in res_a:
         if el != '':
-            res_str += el + ', '
+            res_str += el + '` '
     res_str = res_str[:-2]
     a = entry_a.get()
     updated = '2024-03-19 11:44:19'

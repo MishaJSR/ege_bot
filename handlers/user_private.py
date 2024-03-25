@@ -160,7 +160,7 @@ async def cut_stare_and_prepare_answers(message, UserState, state):
     task_to_show = ''
     if UserState.now_question['answer_mode'] == "Квиз":
         task_to_show += UserState.now_question['description'] + '\n' + '\n'
-        answer_arr = UserState.now_question['answers'].split(", ")
+        answer_arr = UserState.now_question['answers'].split("` ")
         for ind, txt in enumerate(answer_arr):
             task_to_show += f'{ind + 1}: {txt}' + '\n'
     await message.answer(task_to_show)
