@@ -1,3 +1,4 @@
+import emoji
 from aiogram.filters import CommandStart, Command, or_f, StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -5,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from database.orm_query import orm_get_modules_task, orm_add_task, orm_get_prepare_module
-from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb, module_kb, train_kb, quiz_kb, under_prepare_kb
+from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb, module_kb, train_kb, quiz_kb, under_prepare_kb, main_but
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
@@ -48,12 +49,13 @@ class UserState(StatesGroup):
 
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
-    await message.answer('Вы запустили бота', reply_markup=start_kb())
+    text = 'Привет дорогой друг ' + emoji.emojize(':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
+    await message.answer(text, reply_markup=start_kb())
     await state.set_state(UserState.start_choose)
     UserState.last_kb = start_kb()
 
 
-@user_private_router.message(StateFilter('*'), F.text == "Назад")
+@user_private_router.message(StateFilter('*'), F.text == emoji.emojize(':left_arrow:') + ' Назад')
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     print("Назад")
     current_state = await state.get_state()
@@ -71,7 +73,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
                 await message.answer(f"Ок, вы вернулись к прошлому шагу",
                                      reply_markup=UserState.texts[previous.state][1](UserState.data['under_prepare']))
             else:
-                await message.answer(f"Ок, вы вернулись к прошлому шагу", reply_markup=UserState.texts[previous.state][1]())
+                await message.answer(f"Вы вернулись к прошлому шагу", reply_markup=UserState.texts[previous.state][1]())
             # await message.answer(f"Ок, вы вернулись к прошлому шагу \n{UserState.texts[previous.state]}",
             #                      reply_markup=UserState.texts[previous.state][1]())
             return
@@ -97,12 +99,15 @@ async def hello_filter(message: types.Message):
 async def start_func(message: types.Message, state: FSMContext):
     # if not await check_input(message, UserState):
     #     return
-    await message.answer(f'Выберите задание', reply_markup=subj_kb())
+    await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
     await state.set_state(UserState.subj_choose)
 
 
 @user_private_router.message(UserState.subj_choose, F.text)
 async def start_subj_choose(message: types.Message, state: FSMContext):
+    if message.text not in main_but:
+        await message.answer(f'Ошибка ввода')
+        return
     UserState.data['subj'] = message.text
     await message.answer(f'Выберите модуль для подготовки', reply_markup=module_kb())
     await state.set_state(UserState.module_choose)  #
@@ -120,7 +125,7 @@ async def start_module_choose(message: types.Message, session: AsyncSession, sta
         await message.answer(
             f'Ошибка: \n{str(e)}'
         )
-    await message.answer(f'Выберите вариант подготовки', reply_markup=under_prepare_kb(data=UserState.data['under_prepare']))
+    await message.answer(f'Выберите подраздел', reply_markup=under_prepare_kb(data=UserState.data['under_prepare']))
     await state.set_state(UserState.under_prepare_choose)
 
 @user_private_router.message(UserState.under_prepare_choose)

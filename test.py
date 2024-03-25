@@ -52,6 +52,7 @@ def paste_text(event):
     entry_exam.delete(0, tk.END)
     entry_exam.insert(0, root.clipboard_get())
 
+
 # Создаем графический интерфейс
 root = tk.Tk()
 root.title("Простое приложение")
