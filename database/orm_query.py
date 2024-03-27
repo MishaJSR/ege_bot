@@ -7,12 +7,12 @@ async def orm_add_task(session: AsyncSession, data: dict):
     obj = Task(
         exam=data['exam'],
         chapter=data['chapter'],
+        under_chapter=data['under_chapter'],
         description=data['description'],
         answer_mode=data['answer_mode'],
         answers=data['answers'],
         answer=data['answer'],
         about=data['about'],
-        addition=data['addition']
     )
     session.add(obj)
     await session.commit()
