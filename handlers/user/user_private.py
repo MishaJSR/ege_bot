@@ -102,7 +102,7 @@ async def hello_filter(message: types.Message):
     await message.answer('Привет)')
 
 
-@user_private_router.message(UserState.start_choose, )
+@user_private_router.message(UserState.start_choose, F.text != '/admin')
 async def start_func(message: types.Message, state: FSMContext):
     if message.text not in start_but:
         await message.answer(f'Ошибка ввода')

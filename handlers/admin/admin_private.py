@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.orm_query import orm_add_task, get_all_users, find_task, delete_task
 from keyboards.user.reply import start_kb
 from keyboards.admin.reply_admin import start_kb, back_kb, exam_kb, chapter_kb, answers_kb, answers_kb_end, about_kb, \
-    answer_kb, reset_kb
+    answer_kb, reset_kb, send_img_kb
 from handlers.admin.states.states import Admin_state, AdminStateSender, AdminStateDelete
 
 admin_private_router = Router()
@@ -28,7 +28,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
 
     if current_state == Admin_state.start:
-        await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"')
+        await message.answer('Предыдущего шага нет')
         return
 
     previous = None
@@ -56,15 +56,16 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 @admin_private_router.message(AdminStateSender.text_state)
 async def fill_admin_state(message: types.Message, state: FSMContext):
     AdminStateSender.text = message.text
-    await message.answer(text='Отправьте изображение')
+    await message.answer(text='Отправьте изображение', reply_markup=send_img_kb())
     await state.set_state(AdminStateSender.image_state)
 
 
-@admin_private_router.message(F.photo)
+@admin_private_router.message(AdminStateSender.image_state)
 async def process_photo(message: types.Message, state: FSMContext):
     await message.answer_photo(caption=AdminStateSender.text, photo=message.photo[-1].file_id,
                                reply_markup=answers_kb_end())
     AdminStateSender.photo = message.photo[-1].file_id
+    await message.answer(text='Все верно?')
     await state.set_state(AdminStateSender.confirm_state)
 
 

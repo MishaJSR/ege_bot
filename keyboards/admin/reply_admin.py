@@ -65,6 +65,13 @@ def about_kb():
     return test_kb.as_markup(resize_keyboard=True)
 
 
+def send_img_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text='Отмена')
+    test_kb.button(text='Оставить пустым')
+    test_kb.adjust(1, 1)
+    return test_kb.as_markup(resize_keyboard=True)
+
 def back_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Назад')
