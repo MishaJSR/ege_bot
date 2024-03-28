@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models import Task
+from database.models import Task, Users
 from sqlalchemy import select, update
 
 
@@ -16,6 +16,26 @@ async def orm_add_task(session: AsyncSession, data: dict):
     )
     session.add(obj)
     await session.commit()
+
+
+async def check_new_user(session: AsyncSession, user_id: int):
+    query = select(Users.user_id).where(Users.user_id == user_id)
+    result = await session.execute(query)
+    return result.all()
+
+
+async def add_user(session: AsyncSession, user_id: int):
+    obj = Users(
+        user_id=user_id,
+    )
+    session.add(obj)
+    await session.commit()
+
+
+async def get_all_users(session: AsyncSession):
+    query = select(Users.user_id)
+    result = await session.execute(query)
+    return result.all()
 
 
 async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_module=None, target_prepare=None,

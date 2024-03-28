@@ -3,10 +3,9 @@ from aiogram.filters import CommandStart, Command, or_f, StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from database.orm_query import orm_get_modules_task, orm_add_task, orm_get_prepare_module
-from keyboards.reply import start_kb, chapters_kb, prepare_kb, subj_kb, module_kb, train_kb, quiz_kb, under_prepare_kb, main_but
+from database.orm_query import orm_get_modules_task, orm_get_prepare_module, add_user, check_new_user
+from keyboards.user.reply import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
@@ -47,8 +46,15 @@ class UserState(StatesGroup):
 #         return True
 
 
-@user_private_router.message(CommandStart())
+@user_private_router.message(StateFilter('*'), CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
+    try:
+        userid = message.chat.id
+        res = await check_new_user(session, userid)
+        if len(res) == 0:
+            await add_user(session, userid)
+    except:
+        pass
     text = 'Привет дорогой друг ' + emoji.emojize(':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
     await message.answer(text, reply_markup=start_kb())
     await state.set_state(UserState.start_choose)

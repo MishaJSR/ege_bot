@@ -1,16 +1,17 @@
 import os
 
-from aiogram.filters import CommandStart, Command, or_f, StateFilter
+from aiogram.filters import Command, StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from dotenv import find_dotenv, load_dotenv
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import ContentType
 
-from database.orm_query import orm_add_task
-from keyboards.reply import start_kb, del_keyboard
+from database.orm_query import orm_add_task, get_all_users
+from keyboards.user.reply import start_kb
 from sqlalchemy.ext.asyncio import AsyncSession
-from keyboards.reply_admin import start_kb, back_kb, exam_kb, chapter_kb, answers_kb, answers_kb_end, about_kb, \
-    answer_kb, restart_answer_kb
+from keyboards.admin.reply_admin import start_kb, back_kb, exam_kb, chapter_kb, answers_kb, answers_kb_end, about_kb, \
+    answer_kb, restart_answer_kb, reset_kb
 
 admin_private_router = Router()
 load_dotenv(find_dotenv())
@@ -58,6 +59,19 @@ class Admin_state(StatesGroup):
     data = {}
 
 
+class AdminStateSender(StatesGroup):
+    text_state = State()
+    image_state = State()
+    confirm_state = State()
+    texts = {
+        'AdminStateSender:text_state': 'Выбор текста',
+        'AdminStateSender:image_state': 'Выбор изображения',
+        'AdminStateSender:confirm_state': 'Подтверждение',
+    }
+    text = ''
+    photo = None
+
+
 @admin_private_router.message(Command('admin'))
 async def fill_admin_state(message: types.Message, state: FSMContext):
     await message.answer(text='Привет админ', reply_markup=start_kb())
@@ -69,7 +83,7 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
 
-    if current_state == Admin_state.exam:
+    if current_state == Admin_state.start:
         await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"')
         return
 
@@ -83,7 +97,46 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         previous = step
 
 
-@admin_private_router.message(Admin_state.start)
+@admin_private_router.message(F.text == 'Отправить рассылку')
+async def fill_admin_state(message: types.Message, state: FSMContext):
+    await message.answer(text='Напишите текст рассылки', reply_markup=reset_kb())
+    await state.set_state(AdminStateSender.text_state)
+
+
+@admin_private_router.message(AdminStateSender.text_state)
+async def fill_admin_state(message: types.Message, state: FSMContext):
+    if message.text == 'Отмена':
+        await state.set_state(Admin_state.start)
+        await message.answer(f"Ок, вы вернулись к прошлому шагу", reply_markup=start_kb())
+    else:
+        AdminStateSender.text = message.text
+        await message.answer(text='Отправьте изображение')
+        await state.set_state(AdminStateSender.image_state)
+
+
+@admin_private_router.message(F.photo)
+async def process_photo(message: types.Message, state: FSMContext):
+    await message.answer_photo(caption=AdminStateSender.text, photo=message.photo[-1].file_id,
+                               reply_markup=answers_kb_end())
+    AdminStateSender.photo = message.photo[-1].file_id
+    await state.set_state(AdminStateSender.confirm_state)
+
+
+@admin_private_router.message(AdminStateSender.confirm_state)
+async def process_photo(message: types.Message, session: AsyncSession, state: FSMContext):
+    if message.text == 'Подтвердить':
+        res = await get_all_users(session)
+        await message.answer(text="Начало рассылки")
+        for user in res:
+            await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=AdminStateSender.photo, caption=AdminStateSender.text)
+        await message.answer(text="Рассылка завершена")
+    else:
+        await message.answer(text="Ошибка рассылки")
+    await state.set_state(Admin_state.start)
+
+
+
+@admin_private_router.message(F.text == 'Добавить задание')
 async def fill_admin_state(message: types.Message, state: FSMContext):
     await message.answer('Выберите раздел подготовки', reply_markup=exam_kb())
     await state.set_state(Admin_state.exam)

@@ -21,15 +21,7 @@ class Task(Base):
     addition: Mapped[str] = mapped_column(Text, nullable=True)
 
 
-class T(Base):
-    __tablename__ = 't'
+class Users(Base):
+    __tablename__ = 'users'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    subj: Mapped[str] = mapped_column(String(15), nullable=False)
-    exam: Mapped[str] = mapped_column(String(10), nullable=False)
-    chapter: Mapped[str] = mapped_column(String(20), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=False)
-    answer_mode: Mapped[str] = mapped_column(Integer, nullable=False)
-    answer: Mapped[str] = mapped_column(Text, nullable=False)
-
-
-
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
