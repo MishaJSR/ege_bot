@@ -2,6 +2,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardMarkup
 import emoji
 
+start_but = ['Начать подготовку']
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
 modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
 
@@ -12,9 +13,6 @@ def get_pool(kb: ReplyKeyboardBuilder):
 def start_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Начать подготовку')
-    test_kb.button(text='Информация о боте')
-    test_kb.button(text='Оплата')
-    test_kb.button(text='Поддержка')
     pool = get_pool(test_kb)
     test_kb.adjust(2, 2)
     return test_kb.as_markup(resize_keyboard=True)

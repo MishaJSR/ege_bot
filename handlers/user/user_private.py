@@ -5,7 +5,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module, add_user, check_new_user
-from keyboards.user.reply import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but
+from keyboards.user.reply import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
+    start_but, modules
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
@@ -103,8 +104,9 @@ async def hello_filter(message: types.Message):
 
 @user_private_router.message(UserState.start_choose, )
 async def start_func(message: types.Message, state: FSMContext):
-    # if not await check_input(message, UserState):
-    #     return
+    if message.text not in start_but:
+        await message.answer(f'Ошибка ввода')
+        return
     await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
     await state.set_state(UserState.subj_choose)
 
@@ -121,6 +123,9 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
 
 @user_private_router.message(UserState.module_choose)
 async def start_module_choose(message: types.Message, session: AsyncSession, state: FSMContext):
+    if message.text not in modules:
+        await message.answer(f'Ошибка ввода')
+        return
     UserState.data['module'] = message.text
     try:
         res = await orm_get_prepare_module(session, module=UserState.data['module'], exam=UserState.data['subj'])

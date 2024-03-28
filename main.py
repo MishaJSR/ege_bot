@@ -18,7 +18,7 @@ bot = Bot(token=os.getenv('TOKEN'))
 
 dp = Dispatcher()
 admin_private_router.message.outer_middleware(CounterMiddleware())
-dp.include_routers(admin_private_router, user_private_router)
+dp.include_routers(user_private_router, admin_private_router)
 
 
 
