@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 
 
 async def orm_add_task(session: AsyncSession, data: dict):
@@ -38,10 +38,23 @@ async def get_all_users(session: AsyncSession):
     return result.all()
 
 
+async def find_task(session: AsyncSession, text: int):
+    query = select(Task).where(Task.description.like(f'%{text}%'))
+    result = await session.execute(query)
+    return result.all()
+
+
+async def delete_task(session: AsyncSession, description: int):
+    query = delete(Task).where(Task.description == description)
+    await session.execute(query)
+    await session.commit()
+
+
 async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_module=None, target_prepare=None,
                                target_under_prepare=None):
     if target_prepare == 'Практика':
-        query = select(Task).where((Task.exam == target_exam) & (Task.chapter == target_module) & (Task.under_chapter == target_under_prepare))
+        query = select(Task).where(
+            (Task.exam == target_exam) & (Task.chapter == target_module) & (Task.under_chapter == target_under_prepare))
         result = await session.execute(query)
         return result.fetchall()
 

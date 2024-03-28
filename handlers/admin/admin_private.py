@@ -1,75 +1,19 @@
 import os
-
 from aiogram.filters import Command, StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from dotenv import find_dotenv, load_dotenv
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import ContentType
-
-from database.orm_query import orm_add_task, get_all_users
-from keyboards.user.reply import start_kb
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from database.orm_query import orm_add_task, get_all_users, find_task, delete_task
+from keyboards.user.reply import start_kb
 from keyboards.admin.reply_admin import start_kb, back_kb, exam_kb, chapter_kb, answers_kb, answers_kb_end, about_kb, \
-    answer_kb, restart_answer_kb, reset_kb
+    answer_kb, reset_kb
+from handlers.admin.states.states import Admin_state, AdminStateSender, AdminStateDelete
 
 admin_private_router = Router()
 load_dotenv(find_dotenv())
 admin = int(os.getenv('ADMIN_ID'))
-
-
-class Admin_state(StatesGroup):
-    start = State()
-    exam = State()
-    chapter = State()
-    under_chapter = State()
-    description = State()
-    answers_checker = State()
-    answers = State()
-    answers_swap = State()
-    answer = State()
-    about = State()
-    check_info = State()
-    save_in_db = State()
-    texts = {
-        'Admin_state:start': ['Начало работы', start_kb],
-        'Admin_state:exam': ['Выбор части', exam_kb],
-        'Admin_state:chapter': ['Выбор модуля', chapter_kb],
-        'Admin_state:under_chapter': ['Введите подмодуль', back_kb],
-        'Admin_state:description': ['Введите условие задания', back_kb],
-        'Admin_state:answers': ['Введите ответы', restart_answer_kb],
-        'Admin_state:answers_swap': ['Введите вариант ответа', answers_kb_end],
-        'Admin_state:answer': ['Введите ответ на задание', answer_kb],
-        'Admin_state:about': ['Введите пояснение', about_kb],
-        'Admin_state:check_info': ['Проверка', answers_kb_end],
-        'Admin_state:save_in_db': ['Начало работы', start_kb],
-    }
-    default_data = {
-        'exam': None,
-        'chapter': None,
-        'under_chapter': None,
-        'description': None,
-        'answers': '',
-        'answer_mode': 'Квиз',
-        'updated': '2024-03-19 11:44:19',
-        'answer': None,
-        'about': " ",
-        'addition': ' ',
-    }
-    data = {}
-
-
-class AdminStateSender(StatesGroup):
-    text_state = State()
-    image_state = State()
-    confirm_state = State()
-    texts = {
-        'AdminStateSender:text_state': 'Выбор текста',
-        'AdminStateSender:image_state': 'Выбор изображения',
-        'AdminStateSender:confirm_state': 'Подтверждение',
-    }
-    text = ''
-    photo = None
 
 
 @admin_private_router.message(Command('admin'))
@@ -97,6 +41,12 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         previous = step
 
 
+@admin_private_router.message(F.text == 'Отмена')
+async def fill_admin_state(message: types.Message, state: FSMContext):
+    await message.answer(text='Вы вернулись в основное меню', reply_markup=start_kb())
+    await state.set_state(Admin_state.start)
+
+
 @admin_private_router.message(F.text == 'Отправить рассылку')
 async def fill_admin_state(message: types.Message, state: FSMContext):
     await message.answer(text='Напишите текст рассылки', reply_markup=reset_kb())
@@ -105,13 +55,9 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 
 @admin_private_router.message(AdminStateSender.text_state)
 async def fill_admin_state(message: types.Message, state: FSMContext):
-    if message.text == 'Отмена':
-        await state.set_state(Admin_state.start)
-        await message.answer(f"Ок, вы вернулись к прошлому шагу", reply_markup=start_kb())
-    else:
-        AdminStateSender.text = message.text
-        await message.answer(text='Отправьте изображение')
-        await state.set_state(AdminStateSender.image_state)
+    AdminStateSender.text = message.text
+    await message.answer(text='Отправьте изображение')
+    await state.set_state(AdminStateSender.image_state)
 
 
 @admin_private_router.message(F.photo)
@@ -128,12 +74,50 @@ async def process_photo(message: types.Message, session: AsyncSession, state: FS
         res = await get_all_users(session)
         await message.answer(text="Начало рассылки")
         for user in res:
-            await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=AdminStateSender.photo, caption=AdminStateSender.text)
+            await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=AdminStateSender.photo,
+                                         caption=AdminStateSender.text)
         await message.answer(text="Рассылка завершена")
     else:
         await message.answer(text="Ошибка рассылки")
     await state.set_state(Admin_state.start)
 
+
+@admin_private_router.message(F.text == 'Удалить задание')
+async def fill_admin_state(message: types.Message, state: FSMContext):
+    await message.answer('Введите часть из описания задания', reply_markup=reset_kb())
+    await state.set_state(AdminStateDelete.find_key)
+
+
+@admin_private_router.message(AdminStateDelete.find_key)
+async def fill_admin_state(message: types.Message, session: AsyncSession, state: FSMContext):
+    try:
+        res = await find_task(session, message.text)
+        if len(res) == 0:
+            await message.answer('Ничего не нашлось, попробуйте еще раз')
+            await state.set_state(Admin_state.find_key)
+            return
+        for ind, el in enumerate(res):
+            AdminStateDelete.data.append(el._data[0].description)
+            await message.answer(f'{ind}: {el._data[0].description}\n')
+    except:
+        await message.answer('Ошибка поиска', reply_markup=start_kb())
+        await state.set_state(Admin_state.start)
+        return
+    await message.answer('Введите номер задания который вы хотите удалить', reply_markup=reset_kb())
+    await state.set_state(AdminStateDelete.confirm_delete)
+
+
+@admin_private_router.message(AdminStateDelete.confirm_delete)
+async def fill_admin_state(message: types.Message, session: AsyncSession, state: FSMContext):
+    try:
+        des_del = AdminStateDelete.data[int(message.text)]
+        await delete_task(session, des_del)
+    except:
+        await message.answer('Ошибка удаления', reply_markup=start_kb())
+        await state.set_state(Admin_state.start)
+        return
+    await message.answer('Задание удалено', reply_markup=start_kb())
+    await state.set_state(Admin_state.start)
 
 
 @admin_private_router.message(F.text == 'Добавить задание')
@@ -177,12 +161,6 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
     Admin_state.data['answers'] = message.text
     await message.answer('Введите следующий вариант ответа', reply_markup=answers_kb())
     await state.set_state(Admin_state.answers_swap)
-
-
-# @admin_private_router.message(F.text == 'Закончить ввод')
-# async def fill_admin_state(message: types.Message, state: FSMContext):
-#     await message.answer('Конецdd', reply_markup=answers_kb())
-#     await state.set_state(Admin_state.answer)
 
 
 @admin_private_router.message(Admin_state.answers_swap)
