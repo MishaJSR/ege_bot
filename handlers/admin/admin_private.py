@@ -62,9 +62,12 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 
 @admin_private_router.message(AdminStateSender.image_state)
 async def process_photo(message: types.Message, state: FSMContext):
-    await message.answer_photo(caption=AdminStateSender.text, photo=message.photo[-1].file_id,
-                               reply_markup=answers_kb_end())
-    AdminStateSender.photo = message.photo[-1].file_id
+    if message.text == 'Оставить пустым':
+        await message.answer(text=AdminStateSender.text, reply_markup=answers_kb_end())
+    else:
+        await message.answer_photo(caption=AdminStateSender.text, photo=message.photo[-1].file_id,
+                                   reply_markup=answers_kb_end())
+        AdminStateSender.photo = message.photo[-1].file_id
     await message.answer(text='Все верно?')
     await state.set_state(AdminStateSender.confirm_state)
 
@@ -75,12 +78,20 @@ async def process_photo(message: types.Message, session: AsyncSession, state: FS
         res = await get_all_users(session)
         await message.answer(text="Начало рассылки")
         for user in res:
-            await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=AdminStateSender.photo,
-                                         caption=AdminStateSender.text)
-        await message.answer(text="Рассылка завершена")
+            await spammer(message, user, AdminStateSender)
+            # await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=AdminStateSender.photo,
+            #                              caption=AdminStateSender.text)
+        await message.answer(text="Рассылка завершена", reply_markup=start_kb())
     else:
-        await message.answer(text="Ошибка рассылки")
+        await message.answer(text="Ошибка рассылки", reply_markup=start_kb())
     await state.set_state(Admin_state.start)
+
+
+async def spammer(message, user, state):
+    if state.photo is None:
+        await message.bot.send_message(chat_id=user._mapping['user_id'], text=state.text)
+    else:
+        await message.bot.send_photo(chat_id=user._mapping['user_id'], photo=state.photo, caption=state.text)
 
 
 @admin_private_router.message(F.text == 'Удалить задание')

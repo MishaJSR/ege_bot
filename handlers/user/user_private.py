@@ -97,10 +97,6 @@ async def payment(message: types.Message):
     await message.answer('Этот сервис ожидает подключения')
 
 
-@user_private_router.message(F.text, F.text.lower().contains('привет'))
-async def hello_filter(message: types.Message):
-    await message.answer('Привет)')
-
 
 @user_private_router.message(UserState.start_choose, F.text != '/admin')
 async def start_func(message: types.Message, state: FSMContext):
