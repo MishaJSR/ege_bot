@@ -6,7 +6,6 @@ def start_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Добавить задание')
     test_kb.button(text='Удалить задание')
-    test_kb.button(text='Изменить задание')
     test_kb.button(text='Отправить рассылку')
     test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)

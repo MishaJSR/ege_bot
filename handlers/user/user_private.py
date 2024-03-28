@@ -6,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module, add_user, check_new_user
 from keyboards.user.reply import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
-    start_but, modules
+    start_but, modules, teor
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_private_router = Router()
@@ -141,14 +141,19 @@ async def start_module_choose(message: types.Message, session: AsyncSession, sta
 
 @user_private_router.message(UserState.under_prepare_choose)
 async def start_under_choose(message: types.Message, session: AsyncSession,  state: FSMContext):
+    if message.text not in UserState.data['under_prepare']:
+        await message.answer(f'Ошибка ввода')
+        return
     UserState.data['under_prepare_choose'] = message.text
-
     await message.answer(f'Выберите вариант подготовки', reply_markup=prepare_kb())
     await state.set_state(UserState.prepare_choose)
 
 
 @user_private_router.message(UserState.prepare_choose)
 async def start_prepare_choose(message: types.Message, session: AsyncSession, state: FSMContext):
+    if message.text not in teor:
+        await message.answer(f'Ошибка ввода')
+        return
     UserState.data['prepare'] = message.text
     try:
         res = await orm_get_modules_task(session,
@@ -200,14 +205,15 @@ async def cut_stare_and_prepare_answers(message, UserState, state):
 
 
 async def answer_checker(message, UserState):
-    if UserState.now_question['answer_mode'] == 'Квиз':
-        answer_user = sorted([int(ans) for ans in message.text])
-        answer_list = sorted([int(ans) for ans in str(UserState.now_question['answer'])])
-    else:
-        answer_user = [int(ans) for ans in message.text]
-        answer_list = [int(ans) for ans in str(UserState.now_question['answer'])]
-    if answer_list == answer_user:
-        await message.answer(f'Правильно')
+    if message.text.isdigit():
+        if UserState.now_question['answer_mode'] == 'Квиз':
+            answer_user = sorted([int(ans) for ans in message.text])
+            answer_list = sorted([int(ans) for ans in str(UserState.now_question['answer'])])
+        if answer_list == answer_user:
+            await message.answer(f'Правильно')
+        else:
+            await message.answer(f'Ошибка\nПравильные ответы: {UserState.now_question["answer"]}\n'
+                                 f'Пояснение: {str(UserState.now_question["about"])}')
     else:
         await message.answer(f'Ошибка\nПравильные ответы: {UserState.now_question["answer"]}\n'
                              f'Пояснение: {str(UserState.now_question["about"])}')

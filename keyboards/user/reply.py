@@ -5,6 +5,7 @@ import emoji
 start_but = ['Начать подготовку']
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
 modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
+teor = ['Теория', 'Практика']
 
 def get_pool(kb: ReplyKeyboardBuilder):
     return [text.text for text in kb.as_markup().keyboard[0]]
