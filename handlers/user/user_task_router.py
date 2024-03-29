@@ -39,30 +39,13 @@ class UserTaskState(StatesGroup):
     last_kb = None
 
 
-@user_task_router.message(StateFilter('*'), CommandStart())
-async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
-    try:
-        userid, username = message.chat.id, message.from_user.username
-        res = await check_new_user(session, userid)
-        if len(res) == 0:
-            await add_user(session, userid, username)
-    except:
-        pass
-    text = 'Привет дорогой друг ' + emoji.emojize(':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
-    await message.answer(text, reply_markup=start_kb())
-    await state.set_state(UserTaskState.start_choose)
-    UserTaskState.last_kb = start_kb()
+
 
 
 @user_task_router.message(StateFilter('*'), F.text == emoji.emojize(':left_arrow:') + ' Назад')
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     print("Назад")
     current_state = await state.get_state()
-
-    if current_state == UserTaskState.start_choose:
-        await message.answer('Предыдущего шага нет, или введите название товара или напишите "отмена"',
-                             reply_markup=start_kb())
-        return
 
     previous = None
     for step in UserTaskState.__all_states__:
@@ -71,6 +54,10 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
             if previous.state == 'UserTaskState:under_prepare_choose':
                 await message.answer(f"Ок, вы вернулись к прошлому шагу",
                                      reply_markup=UserTaskState.texts[previous.state][1](UserTaskState.data['under_prepare']))
+            elif previous.state == 'UserTaskState:start_choose':
+                await message.answer(f"Вы вернулись в главное меню",
+                                     reply_markup=UserTaskState.texts[previous.state][1]())
+                print(previous.state)
             else:
                 await message.answer(f"Вы вернулись к прошлому шагу", reply_markup=UserTaskState.texts[previous.state][1]())
             # await message.answer(f"Ок, вы вернулись к прошлому шагу \n{UserTaskState.texts[previous.state]}",
@@ -79,13 +66,13 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         previous = step
 
 
-@user_task_router.message(UserTaskState.start_choose, F.text != '/admin')
-async def start_func(message: types.Message, state: FSMContext):
-    if message.text not in ['Начать подготовку']:
-        await message.answer(f'Ошибка ввода')
-        return
-    await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
-    await state.set_state(UserTaskState.subj_choose)
+# @user_task_router.message(UserTaskState.start_choose, F.text != '/admin')
+# async def start_func(message: types.Message, state: FSMContext):
+#     if message.text not in ['Начать подготовку']:
+#         await message.answer(f'Ошибка ввода')
+#         return
+#     await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
+#     await state.set_state(UserTaskState.subj_choose)
 
 
 @user_task_router.message(UserTaskState.subj_choose, F.text)

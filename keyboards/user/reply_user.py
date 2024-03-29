@@ -6,6 +6,8 @@ start_but = ['Начать подготовку', 'Оплата подписки
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
 modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
 teor = ['Теория', 'Практика']
+sub_var = ['1 месяц: 99 рублей', '3 месяца: 249 рублей', '6 месяцев: 459 рублей', '1 год: 699 рублей']
+pay_var = ['QR код', 'Карта']
 
 
 def start_kb(data=None):
@@ -79,5 +81,21 @@ def quiz_kb(data_mass=None, sizes: tuple[int] = (1,)):
     test_kb.adjust(1, 2)
     return test_kb.as_markup(resize_keyboard=True)
 
+
+def payment_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')
+    for but in sub_var:
+        test_kb.button(text=but)
+    test_kb.adjust(1, 1)
+    return test_kb.as_markup(resize_keyboard=True)
+
+def payment_var_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')
+    for but in pay_var:
+        test_kb.button(text=but)
+    test_kb.adjust(1, 1)
+    return test_kb.as_markup(resize_keyboard=True)
 
 del_keyboard = ReplyKeyboardRemove()

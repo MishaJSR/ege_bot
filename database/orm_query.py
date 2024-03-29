@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 
 
 async def orm_add_task(session: AsyncSession, data: dict):
@@ -22,6 +24,19 @@ async def check_new_user(session: AsyncSession, user_id: int):
     query = select(Users.user_id).where(Users.user_id == user_id)
     result = await session.execute(query)
     return result.all()
+
+
+async def check_sub_orm(session: AsyncSession, user_id: int):
+    query = select(Users).where(Users.user_id == user_id)
+    result = await session.execute(query)
+    return result.all()
+
+
+async def set_sub_orm(session: AsyncSession, user_id: int, days):
+    new_date = datetime.now() + timedelta(days=days)
+    query = update(Users).where(Users.user_id == user_id).values(is_subscribe=True, day_end_subscribe=new_date)
+    await session.execute(query)
+    await session.commit()
 
 
 async def add_user(session: AsyncSession, user_id: int, username: str):
