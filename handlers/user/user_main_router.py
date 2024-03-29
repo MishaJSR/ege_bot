@@ -42,10 +42,10 @@ class UserState(StatesGroup):
 @user_private_router.message(StateFilter('*'), CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
     try:
-        userid = message.chat.id
+        userid, username = message.chat.id, message.from_user.username
         res = await check_new_user(session, userid)
         if len(res) == 0:
-            await add_user(session, userid)
+            await add_user(session, userid, username)
     except:
         pass
     text = 'Привет дорогой друг ' + emoji.emojize(':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'

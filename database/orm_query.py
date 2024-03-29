@@ -24,9 +24,10 @@ async def check_new_user(session: AsyncSession, user_id: int):
     return result.all()
 
 
-async def add_user(session: AsyncSession, user_id: int):
+async def add_user(session: AsyncSession, user_id: int, username: str):
     obj = Users(
         user_id=user_id,
+        username=username
     )
     session.add(obj)
     await session.commit()
