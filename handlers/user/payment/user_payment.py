@@ -51,9 +51,9 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
         return
     UserPaymentState.data = 0
     if 'мес' in message.text:
-        UserPaymentState.data = int(31 * int(message.text[0]))
+        UserPaymentState.data = int(message.text[0])
     else:
-        UserPaymentState.data = 365
+        UserPaymentState.data = 12
     await message.answer(f'Выберите вариант оплаты', reply_markup=payment_var_kb())
     await state.set_state(UserPaymentState.pay_process)
 

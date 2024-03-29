@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import calendar
+import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
@@ -32,8 +33,8 @@ async def check_sub_orm(session: AsyncSession, user_id: int):
     return result.all()
 
 
-async def set_sub_orm(session: AsyncSession, user_id: int, days):
-    new_date = datetime.now() + timedelta(days=days)
+async def set_sub_orm(session: AsyncSession, user_id: int, months):
+    new_date = add_months(datetime.datetime.now(), months)
     query = update(Users).where(Users.user_id == user_id).values(is_subscribe=True, day_end_subscribe=new_date)
     await session.execute(query)
     await session.commit()
@@ -79,3 +80,11 @@ async def orm_get_prepare_module(session: AsyncSession, module=None, exam=None):
     query = select(Task.under_chapter).where((Task.chapter == module) & (Task.exam == exam)).distinct()
     result = await session.execute(query)
     return result
+
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return datetime.date(year, month, day)

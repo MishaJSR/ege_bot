@@ -1,6 +1,7 @@
 import emoji
+from aiogram.enums import ChatType
 from aiogram.filters import Command, or_f, StateFilter, CommandStart
-from aiogram import types, Router, F
+from aiogram import types, Router, F, Bot, exceptions
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,7 +27,6 @@ class UserState(StatesGroup):
         'under_prepare_choose': None,
         'prepare': None,
     }
-
 
 @user_private_router.message(StateFilter('*'), CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):

@@ -1,3 +1,6 @@
+import calendar
+from datetime import datetime
+
 from database.orm_query import check_sub_orm
 
 
@@ -13,3 +16,11 @@ async def check_subscribe(message, session, userid, show=True):
             await message.answer(f'Пользователь: {res[0]._data[0].username}\n'
                              f'Подписка не активна')
         return False
+
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return datetime.date(year, month, day)
