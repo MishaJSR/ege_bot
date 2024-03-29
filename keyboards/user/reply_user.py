@@ -1,21 +1,18 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton
-from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder, InlineKeyboardMarkup
+from aiogram.types import ReplyKeyboardRemove
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import emoji
 
-start_but = ['Начать подготовку']
+start_but = ['Начать подготовку', 'Оплата подписки', 'Проверить подписку']
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
 modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
 teor = ['Теория', 'Практика']
 
-def get_pool(kb: ReplyKeyboardBuilder):
-    return [text.text for text in kb.as_markup().keyboard[0]]
-
 
 def start_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
-    test_kb.button(text='Начать подготовку')
-    pool = get_pool(test_kb)
-    test_kb.adjust(2, 2)
+    for el in start_but:
+        test_kb.button(text=el)
+    test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
 
 
@@ -55,11 +52,12 @@ def under_prepare_kb(data=None):
     test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
 
+
 def prepare_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')
-    test_kb.button(text='Теория')
-    test_kb.button(text='Практика')
+    for but in teor:
+        test_kb.button(text=but)
     test_kb.adjust(1, 2)
     return test_kb.as_markup(resize_keyboard=True)
 

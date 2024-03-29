@@ -10,14 +10,15 @@ load_dotenv(find_dotenv())
 from handlers.user.user_main_router import user_private_router
 from handlers.admin.admin_main_router import admin_private_router
 from common.bot_cmd_list import private
-from middlewares.db import CounterMiddleware, DataBaseSession
+from middlewares.db import DataBaseSession
+from middlewares.admin import AdminMiddleware
 from database.engine import create_db, drop_db, session_marker
 
 ALLOWED_UPDATES = ['message, edited_message']
 bot = Bot(token=os.getenv('TOKEN'))
 
 dp = Dispatcher()
-admin_private_router.message.outer_middleware(CounterMiddleware())
+admin_private_router.message.outer_middleware(AdminMiddleware())
 dp.include_routers(user_private_router, admin_private_router)
 
 

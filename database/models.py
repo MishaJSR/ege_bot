@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Text, DateTime, func, Integer
+from sqlalchemy import String, Text, DateTime, func, Integer, Boolean
 
 
 class Base(DeclarativeBase):
@@ -26,3 +26,5 @@ class Users(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(Integer, nullable=False)
     username: Mapped[str] = mapped_column(String(30), nullable=False)
+    is_subscribe: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    day_end_subscribe: Mapped[DateTime] = mapped_column(DateTime, nullable=True)

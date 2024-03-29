@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, delete
 
 
 async def orm_add_task(session: AsyncSession, data: dict):
