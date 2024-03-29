@@ -6,8 +6,8 @@ from aiogram.types import BotCommandScopeAllPrivateChats
 from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
-from handlers.user.user_private import user_private_router
-from handlers.admin.admin_private import admin_private_router
+from handlers.user.user_main_router import user_private_router
+from handlers.admin.admin_main_router import admin_private_router
 from common.bot_cmd_list import private
 
 from middlewares.db import CounterMiddleware, DataBaseSession
@@ -19,7 +19,6 @@ bot = Bot(token=os.getenv('TOKEN'))
 dp = Dispatcher()
 admin_private_router.message.outer_middleware(CounterMiddleware())
 dp.include_routers(user_private_router, admin_private_router)
-
 
 
 

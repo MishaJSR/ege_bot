@@ -39,14 +39,6 @@ class UserState(StatesGroup):
     last_kb = None
 
 
-# async def check_input(message: types.Message, state):
-#     if message.md_text not in state.available_params:
-#         await message.answer(f'Ошибка ввода')
-#         return False
-#     else:
-#         return True
-
-
 @user_private_router.message(StateFilter('*'), CommandStart())
 async def start_cmd(message: types.Message, session: AsyncSession, state: FSMContext):
     try:
@@ -97,7 +89,6 @@ async def payment(message: types.Message):
     await message.answer('Этот сервис ожидает подключения')
 
 
-
 @user_private_router.message(UserState.start_choose, F.text != '/admin')
 async def start_func(message: types.Message, state: FSMContext):
     if message.text not in start_but:
@@ -135,8 +126,9 @@ async def start_module_choose(message: types.Message, session: AsyncSession, sta
     await message.answer(f'Выберите подраздел', reply_markup=under_prepare_kb(data=UserState.data['under_prepare']))
     await state.set_state(UserState.under_prepare_choose)
 
+
 @user_private_router.message(UserState.under_prepare_choose)
-async def start_under_choose(message: types.Message, session: AsyncSession,  state: FSMContext):
+async def start_under_choose(message: types.Message, session: AsyncSession, state: FSMContext):
     if message.text not in UserState.data['under_prepare']:
         await message.answer(f'Ошибка ввода')
         return
