@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from keyboards.user.reply import main_but, modules
+from keyboards.user.reply_user import main_but, modules
 
 
 def start_kb(data=None):

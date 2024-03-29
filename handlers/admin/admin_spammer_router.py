@@ -3,9 +3,9 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.orm_query import get_all_users
-from keyboards.user.reply import start_kb
+from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb, answers_kb_end, reset_kb, send_img_kb
-from handlers.admin.admin_states.states import Admin_state, AdminStateSender
+from handlers.admin.states import Admin_state, AdminStateSender
 
 admin_spammer_router = Router()
 

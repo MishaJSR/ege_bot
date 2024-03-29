@@ -3,10 +3,10 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.orm_query import orm_add_task
-from keyboards.user.reply import start_kb
+from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb, answers_kb_end, about_kb, answers_kb, \
     answer_kb, back_kb, chapter_kb, exam_kb
-from handlers.admin.admin_states.states import Admin_state
+from handlers.admin.states import Admin_state
 
 admin_add_task_router = Router()
 

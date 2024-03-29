@@ -3,9 +3,9 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.orm_query import find_task, delete_task
-from keyboards.user.reply import start_kb
+from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb, reset_kb
-from handlers.admin.admin_states.states import Admin_state, AdminStateDelete
+from handlers.admin.states import Admin_state, AdminStateDelete
 
 admin_delete_task_router = Router()
 
