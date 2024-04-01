@@ -18,7 +18,7 @@ ALLOWED_UPDATES = ['message, edited_message']
 bot = Bot(token=os.getenv('TOKEN'))
 
 dp = Dispatcher()
-admin_private_router.message.outer_middleware(AdminMiddleware())
+#admin_private_router.message.outer_middleware(AdminMiddleware())
 dp.include_routers(admin_private_router, user_private_router)
 
 
