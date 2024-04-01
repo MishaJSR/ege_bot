@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import emoji
 
-start_but = ['Начать подготовку', 'Оплата подписки', 'Проверить подписку']
+start_but = ['Начать подготовку', 'Проверить подписку']
 main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
 modules = ['Человек и общество', 'Экономика', 'Социальные отношения', 'Политика', 'Право']
 teor = ['Теория', 'Практика']

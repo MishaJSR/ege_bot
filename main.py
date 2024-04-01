@@ -1,7 +1,7 @@
 import os
 import asyncio
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 from aiogram.types import BotCommandScopeAllPrivateChats
 from dotenv import find_dotenv, load_dotenv
 
@@ -32,6 +32,7 @@ async def on_startup(bot):
 
 async def on_shutdown(bot):
     print('Bot end')
+
 
 
 async def main():
