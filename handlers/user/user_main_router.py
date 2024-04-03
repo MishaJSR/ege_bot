@@ -39,14 +39,14 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
         res = await check_new_user(session, userid)
         if len(res) == 0:
             await add_user(session, userid, username)
-        res = await message.bot.get_chat_member(chat_id='-1002022380565', user_id=message.from_user.id)
-        if res.status.value not in ['member', 'creator']:
-            raise Exception()
+        # res = await message.bot.get_chat_member(chat_id='-1002022380565', user_id=message.from_user.id)
+        # if res.status.value not in ['member', 'creator']:
+        #     raise Exception()
     except:
-        await message.answer('Вы не подписаны на канал', reply_markup=get_inline())
-        await message.answer('После подписки вы получите доступ к подготовке', reply_markup=start_kb())
-        await state.set_state(UserState.start_user)
-        UserTaskState.last_kb = start_kb()
+        # await message.answer('Вы не подписаны на канал', reply_markup=get_inline())
+        # await message.answer('После подписки вы получите доступ к подготовке', reply_markup=start_kb())
+        # await state.set_state(UserState.start_user)
+        # UserTaskState.last_kb = start_kb()
         return
     text = f'Привет {message.from_user.username} ' + emoji.emojize(
         ':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
@@ -62,11 +62,19 @@ async def start_subj_choose(message: types.Message, state: FSMContext, session: 
         await message.answer(f'Ошибка ввода')
         return
     if message.text == 'Начать подготовку':
-        await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
-        await state.set_state(UserTaskState.subj_choose)
-    if message.text == 'Оплата подписки':
-        await message.answer(f'Выберите тариф', reply_markup=payment_kb())
-        await state.set_state(UserPaymentState.sub_process)
+        try:
+            res = await message.bot.get_chat_member(chat_id='-1002022380565', user_id=message.from_user.id)
+            if res.status.value not in ['member', 'creator']:
+                raise Exception()
+            await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
+            await state.set_state(UserTaskState.subj_choose)
+        except:
+            await message.answer('Вы не подписаны на канал', reply_markup=get_inline())
+            return
+
+    # if message.text == 'Оплата подписки':
+    #     await message.answer(f'Выберите тариф', reply_markup=payment_kb())
+    #     await state.set_state(UserPaymentState.sub_process)
     if message.text == 'Проверить подписку':
         await message.answer(f'Проверяем ...')
         try:
@@ -77,8 +85,6 @@ async def start_subj_choose(message: types.Message, state: FSMContext, session: 
             await message.answer(f'Подписки нет')
             return
         await message.answer(f'Подпискa есть')
-
-
 
 
 @user_private_router.message(Command('about'))

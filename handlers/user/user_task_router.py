@@ -164,8 +164,7 @@ async def cut_stare_and_prepare_answers(message, UserTaskState, state):
         answer_arr = UserTaskState.now_question['answers'].split("` ")
         for ind, txt in enumerate(answer_arr):
             task_to_show += f'{ind + 1}: {txt}' + '\n'
-    await message.answer(task_to_show)
-    await message.answer('Введите правильные ответы в формате 135', reply_markup=train_kb())
+    await message.answer(task_to_show, reply_markup=train_kb())
     await state.set_state(UserTaskState.train_choose)
 
 
@@ -177,8 +176,8 @@ async def answer_checker(message, UserTaskState):
         if answer_list == answer_user:
             await message.answer(f'Правильно')
         else:
-            await message.answer(f'Ошибка\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
-                                 f'Пояснение: {str(UserTaskState.now_question["about"])}')
+            await message.answer(f'*Ошибка*\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
+                                 f'\n*Пояснение*: {str(UserTaskState.now_question["about"])}', parse_mode="Markdown")
     else:
-        await message.answer(f'Ошибка\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
-                             f'Пояснение: {str(UserTaskState.now_question["about"])}')
+        await message.answer(f'*Ошибка*\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
+                             f'\n*Пояснение*: {str(UserTaskState.now_question["about"])}', parse_mode="Markdown")
