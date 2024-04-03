@@ -52,7 +52,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         if step.state == current_state:
             await state.set_state(previous)
             if previous.state == 'UserTaskState:under_prepare_choose':
-                await message.answer(f"Ок, вы вернулись к прошлому шагу",
+                await message.answer(f"Вы вернулись к прошлому шагу",
                                      reply_markup=UserTaskState.texts[previous.state][1](UserTaskState.data['under_prepare']))
             elif previous.state == 'UserTaskState:start_choose':
                 await message.answer(f"Вы вернулись в главное меню",
