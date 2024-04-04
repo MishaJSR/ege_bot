@@ -1,12 +1,12 @@
 import emoji
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
-from database.orm_query import orm_get_modules_task, orm_get_prepare_module, add_user, check_new_user
+from database.orm_query import orm_get_modules_task, orm_get_prepare_module
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
-    start_but, modules, teor
+modules, teor
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_task_router = Router()
@@ -51,28 +51,19 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     for step in UserTaskState.__all_states__:
         if step.state == current_state:
             await state.set_state(previous)
+            data = await state.get_data()
             if previous.state == 'UserTaskState:under_prepare_choose':
                 await message.answer(f"Вы вернулись к прошлому шагу",
-                                     reply_markup=UserTaskState.texts[previous.state][1](UserTaskState.data['under_prepare']))
+                                     reply_markup=UserTaskState.texts[previous.state][1](data['under_prepare']))
             elif previous.state == 'UserTaskState:start_choose':
                 await message.answer(f"Вы вернулись в главное меню",
                                      reply_markup=UserTaskState.texts[previous.state][1]())
                 print(previous.state)
             else:
                 await message.answer(f"Вы вернулись к прошлому шагу", reply_markup=UserTaskState.texts[previous.state][1]())
-            # await message.answer(f"Ок, вы вернулись к прошлому шагу \n{UserTaskState.texts[previous.state]}",
-            #                      reply_markup=UserTaskState.texts[previous.state][1]())
             return
         previous = step
 
-
-# @user_task_router.message(UserTaskState.start_choose, F.text != '/admin')
-# async def start_func(message: types.Message, state: FSMContext):
-#     if message.text not in ['Начать подготовку']:
-#         await message.answer(f'Ошибка ввода')
-#         return
-#     await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
-#     await state.set_state(UserTaskState.subj_choose)
 
 
 @user_task_router.message(UserTaskState.subj_choose, F.text)
@@ -80,7 +71,9 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
     if message.text not in main_but:
         await message.answer(f'Ошибка ввода')
         return
-    UserTaskState.data['subj'] = message.text
+    data = await state.get_data()
+    data['subj'] = message.text
+    await state.set_data(data)
     await message.answer(f'Выберите модуль для подготовки', reply_markup=module_kb())
     await state.set_state(UserTaskState.module_choose)  #
 
@@ -90,26 +83,35 @@ async def start_module_choose(message: types.Message, session: AsyncSession, sta
     if message.text not in modules:
         await message.answer(f'Ошибка ввода')
         return
-    UserTaskState.data['module'] = message.text
+    data = await state.get_data()
+    data['module'] = message.text
+    await state.set_data(data)
     try:
-        res = await orm_get_prepare_module(session, module=UserTaskState.data['module'], exam=UserTaskState.data['subj'])
-        UserTaskState.data['under_prepare'] = []
+        res = await orm_get_prepare_module(session, module=data['module'], exam=data['subj'])
+        under_prepare_data = []
         for task in res:
-            UserTaskState.data['under_prepare'].append(task._data[0])
+            under_prepare_data.append(task._data[0])
+        data = await state.get_data()
+        data['under_prepare'] = under_prepare_data
+        await state.set_data(data)
     except Exception as e:
         await message.answer(
             f'Ошибка: \n{str(e)}'
         )
-    await message.answer(f'Выберите подраздел', reply_markup=under_prepare_kb(data=UserTaskState.data['under_prepare']))
+        return
+    await message.answer(f'Выберите подраздел', reply_markup=under_prepare_kb(data=data['under_prepare']))
     await state.set_state(UserTaskState.under_prepare_choose)
 
 
 @user_task_router.message(UserTaskState.under_prepare_choose)
 async def start_under_choose(message: types.Message, session: AsyncSession, state: FSMContext):
-    if message.text not in UserTaskState.data['under_prepare']:
+    data = await state.get_data()
+    if message.text not in data['under_prepare']:
         await message.answer(f'Ошибка ввода')
         return
-    UserTaskState.data['under_prepare_choose'] = message.text
+    data = await state.get_data()
+    data['under_prepare_choose'] = message.text
+    await state.set_data(data)
     await message.answer(f'Выберите вариант подготовки', reply_markup=prepare_kb())
     await state.set_state(UserTaskState.prepare_choose)
 
@@ -119,65 +121,85 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
     if message.text not in teor:
         await message.answer(f'Ошибка ввода')
         return
-    UserTaskState.data['prepare'] = message.text
+    data = await state.get_data()
+    data['prepare'] = message.text
+    await state.set_data(data)
     try:
         res = await orm_get_modules_task(session,
-                                         target_exam=UserTaskState.data['subj'],
-                                         target_module=UserTaskState.data['module'],
-                                         target_prepare=UserTaskState.data['prepare'],
-                                         target_under_prepare=UserTaskState.data['under_prepare_choose'])
+                                         target_exam=data['subj'],
+                                         target_module=data['module'],
+                                         target_prepare=data['prepare'],
+                                         target_under_prepare=data['under_prepare_choose'])
+        question_data = []
         for task in res:
-            UserTaskState.question_data.append({
+            question_data.append({
                 'description': task._data[0].description,
                 'answers': task._data[0].answers,
                 'answer': task._data[0].answer,
                 'about': task._data[0].about,
                 'answer_mode': task._data[0].answer_mode,
                 'addition': task._data[0].addition})
-            # chapter_but.append(fields.chapter)
+        data = await state.get_data()
+        data['question_data'] = question_data
+        await state.set_data(data)
     except Exception as e:
         await message.answer(
             f'Ошибка: \n{str(e)}'
         )
-    if len(UserTaskState.question_data) == 0:
+    if len(data['question_data']) == 0:
         await message.answer('Задания еще не добавлены в бота')
     else:
-        await cut_stare_and_prepare_answers(message, UserTaskState, state)
+        await cut_stare_and_prepare_answers(message, state)
 
 
 @user_task_router.message(UserTaskState.train_choose, F.text)
 async def start_train_choose(message: types.Message, session: AsyncSession, state: FSMContext):
-    await answer_checker(message, UserTaskState)
-    if len(UserTaskState.question_data) == 0:
+    await answer_checker(message, state)
+    data = await state.get_data()
+    if len(data['question_data']) == 0:
         await message.answer(f'Вопросы закончились', reply_markup=prepare_kb())
         await state.set_state(UserTaskState.prepare_choose)
     else:
-        await cut_stare_and_prepare_answers(message, UserTaskState, state)
+        await cut_stare_and_prepare_answers(message, state)
 
 
-async def cut_stare_and_prepare_answers(message, UserTaskState, state):
-    UserTaskState.now_question = UserTaskState.question_data[-1]
-    UserTaskState.question_data.pop()
+async def cut_stare_and_prepare_answers(message, state):
+    data = await state.get_data()
+    data['now_question'] = data['question_data'][-1]
+    data['question_data'].pop()
     task_to_show = ''
-    if UserTaskState.now_question['answer_mode'] == "Квиз":
-        task_to_show += UserTaskState.now_question['description'] + '\n' + '\n'
-        answer_arr = UserTaskState.now_question['answers'].split("` ")
+    if data['now_question']['answer_mode'] == "Квиз":
+        task_to_show += data['now_question']['description'] + '\n' + '\n'
+        answer_arr = data['now_question']['answers'].split("` ")
         for ind, txt in enumerate(answer_arr):
             task_to_show += f'{ind + 1}: {txt}' + '\n'
+    await state.set_data(data)
     await message.answer(task_to_show, reply_markup=train_kb())
     await state.set_state(UserTaskState.train_choose)
 
 
-async def answer_checker(message, UserTaskState):
+async def answer_checker(message, state):
+    data = await state.get_data()
     if message.text.isdigit():
-        if UserTaskState.now_question['answer_mode'] == 'Квиз':
+        if data['now_question']['answer_mode'] == 'Квиз':
             answer_user = sorted([int(ans) for ans in message.text])
-            answer_list = sorted([int(ans) for ans in str(UserTaskState.now_question['answer'])])
+            answer_list = sorted([int(ans) for ans in str(data['now_question']['answer'])])
         if answer_list == answer_user:
             await message.answer(f'Правильно')
         else:
-            await message.answer(f'*Ошибка*\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
-                                 f'\n*Пояснение*: {str(UserTaskState.now_question["about"])}', parse_mode="Markdown")
+            ans = data['now_question']["answer"]
+            ab = data['now_question']["about"]
+            if len(ab):
+                await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n'
+                                 f'\n*Пояснение*: {str(ab)}', parse_mode="Markdown")
+            else:
+                await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n', parse_mode="Markdown")
     else:
-        await message.answer(f'*Ошибка*\nПравильные ответы: {UserTaskState.now_question["answer"]}\n'
-                             f'\n*Пояснение*: {str(UserTaskState.now_question["about"])}', parse_mode="Markdown")
+        ans = data['now_question']["answer"]
+        ab = data['now_question']["about"]
+        if len(ab) > 3:
+            await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n'
+                                 f'\n*Пояснение*: {str(ab)}', parse_mode="Markdown")
+        else:
+            await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n', parse_mode="Markdown")
+
