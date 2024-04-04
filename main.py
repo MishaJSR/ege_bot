@@ -15,21 +15,22 @@ from middlewares.db import DataBaseSession
 from database.engine import create_db, drop_db, session_marker
 
 
-def get_storage(redis):
+def get_storage():
+    redis = {
+        'user': 'user',
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0,
+        'password': ''
+    }
     url = f"redis://:{redis['password']}@{redis['host']}:{redis['port']}/{redis['db']}"
     return RedisStorage.from_url(url)
 
 
-redis = {
-    'user': 'user',
-    'host': '127.0.0.1',
-    'port': 6379,
-    'db': 0,
-    'password': ''
-}
+
 ALLOWED_UPDATES = ['message, edited_message']
 bot = Bot(token=os.getenv('TOKEN'))
-dp = Dispatcher(storage=get_storage(redis))
+dp = Dispatcher(storage=get_storage())
 dp.include_routers(admin_private_router, user_private_router)
 
 
