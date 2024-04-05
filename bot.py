@@ -17,9 +17,9 @@ from database.engine import create_db, drop_db, session_marker
 
 def get_storage():
     redis = {
-        'user': 'user',
-        'host': '127.0.0.1',
-        'port': 6379,
+        'user': os.getenv('REDISUSERNAME'),
+        'host': os.getenv('REDISHOST'),
+        'port': os.getenv('REDISPORT'),
         'db': 0,
         'password': os.getenv('REDISPASSWORD')
     }

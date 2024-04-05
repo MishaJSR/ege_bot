@@ -1,0 +1,26 @@
+services:
+  bot:
+    image: "bot"
+    stop_signal: SIGINT
+    build:
+      context: .
+    working_dir: "/usr/src/app/bot"
+    volumes:
+      - ../usr/src/app/bot
+    command: python3 -m bot
+    restart: always
+    env_file:
+      - ".env"
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - "6388:6388"
+    restart: always
+    command: redis-server --port $REDISPORT --save 20 1 --loglevel warning --requirepass $REDISPASSWORD
+    env_file:
+      - ".env"
+    volumes:
+      - cache:/data
+
+volumes:
+  cache: { }
