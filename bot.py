@@ -21,7 +21,7 @@ def get_storage():
         'host': '127.0.0.1',
         'port': 6379,
         'db': 0,
-        'password': ''
+        'password': os.getenv('REDISPASSWORD')
     }
     url = f"redis://:{redis['password']}@{redis['host']}:{redis['port']}/{redis['db']}"
     return RedisStorage.from_url(url)

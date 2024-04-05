@@ -6,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
-modules, teor
+    modules, teor
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_task_router = Router()
@@ -27,19 +27,6 @@ class UserTaskState(StatesGroup):
         'UserTaskState:prepare_choose': ['Выбрана подготовка', prepare_kb],
         'UserTaskState:train_choose': ['Выбрана подготовка', train_kb],
     }
-    data = {
-        'subj': None,
-        'module': None,
-        'under_prepare': [],
-        'under_prepare_choose': None,
-        'prepare': None,
-    }
-    question_data = []
-    now_question = []
-    last_kb = None
-
-
-
 
 
 @user_task_router.message(StateFilter('*'), F.text == emoji.emojize(':left_arrow:') + ' Назад')
@@ -60,10 +47,10 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
                                      reply_markup=UserTaskState.texts[previous.state][1]())
                 print(previous.state)
             else:
-                await message.answer(f"Вы вернулись к прошлому шагу", reply_markup=UserTaskState.texts[previous.state][1]())
+                await message.answer(f"Вы вернулись к прошлому шагу",
+                                     reply_markup=UserTaskState.texts[previous.state][1]())
             return
         previous = step
-
 
 
 @user_task_router.message(UserTaskState.subj_choose, F.text)
@@ -130,15 +117,15 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
                                          target_module=data['module'],
                                          target_prepare=data['prepare'],
                                          target_under_prepare=data['under_prepare_choose'])
-        question_data = []
-        for task in res:
-            question_data.append({
-                'description': task._data[0].description,
-                'answers': task._data[0].answers,
-                'answer': task._data[0].answer,
-                'about': task._data[0].about,
-                'answer_mode': task._data[0].answer_mode,
-                'addition': task._data[0].addition})
+
+        question_data = [{
+            'description': task._data[0].description,
+            'answers': task._data[0].answers,
+            'answer': task._data[0].answer,
+            'about': task._data[0].about,
+            'answer_mode': task._data[0].answer_mode,
+            'addition': task._data[0].addition
+        } for task in res]
         data = await state.get_data()
         data['question_data'] = question_data
         await state.set_data(data)
@@ -153,7 +140,7 @@ async def start_prepare_choose(message: types.Message, session: AsyncSession, st
 
 
 @user_task_router.message(UserTaskState.train_choose, F.text)
-async def start_train_choose(message: types.Message, session: AsyncSession, state: FSMContext):
+async def start_train_choose(message: types.Message, state: FSMContext):
     await answer_checker(message, state)
     data = await state.get_data()
     if len(data['question_data']) == 0:
@@ -178,28 +165,28 @@ async def cut_stare_and_prepare_answers(message, state):
     await state.set_state(UserTaskState.train_choose)
 
 
+async def handle_correct_answer(message):
+    await message.answer(f'Правильно')
+
+
+async def handle_wrong_answer(message, correct_answers, explanation=""):
+    if len(explanation) > 3:
+        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n'
+                             f'\n*Пояснение*: {explanation}', parse_mode="Markdown")
+    else:
+        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown")
+
+
 async def answer_checker(message, state):
     data = await state.get_data()
-    if message.text.isdigit():
-        if data['now_question']['answer_mode'] == 'Квиз':
-            answer_user = sorted([int(ans) for ans in message.text])
-            answer_list = sorted([int(ans) for ans in str(data['now_question']['answer'])])
-        if answer_list == answer_user:
-            await message.answer(f'Правильно')
-        else:
-            ans = data['now_question']["answer"]
-            ab = data['now_question']["about"]
-            if len(ab):
-                await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n'
-                                 f'\n*Пояснение*: {str(ab)}', parse_mode="Markdown")
-            else:
-                await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n', parse_mode="Markdown")
-    else:
-        ans = data['now_question']["answer"]
-        ab = data['now_question']["about"]
-        if len(ab) > 3:
-            await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n'
-                                 f'\n*Пояснение*: {str(ab)}', parse_mode="Markdown")
-        else:
-            await message.answer(f'*Ошибка*\nПравильные ответы: {str(ans)}\n', parse_mode="Markdown")
 
+    if message.text.isdigit():
+        answer_user = sorted([int(ans) for ans in message.text])
+        answer_list = sorted([int(ans) for ans in str(data['now_question']['answer'])])
+
+        if data['now_question']['answer_mode'] == 'Квиз' and answer_list == answer_user:
+            await handle_correct_answer(message, data['now_question']['answer'])
+        else:
+            await handle_wrong_answer(message, data['now_question']['answer'], data['now_question']['about'])
+    else:
+        await handle_wrong_answer(message, data['now_question']['answer'], data['now_question']['about'])
