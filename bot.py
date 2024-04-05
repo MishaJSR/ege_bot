@@ -3,6 +3,7 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommandScopeAllPrivateChats
+from aiogram.fsm.storage.redis import RedisStorage
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
@@ -10,15 +11,27 @@ load_dotenv(find_dotenv())
 from handlers.user.user_main_router import user_private_router
 from handlers.admin.admin_main_router import admin_private_router
 from common.bot_cmd_list import private
-from middlewares.db import CounterMiddleware, DataBaseSession
+from middlewares.db import DataBaseSession
 from database.engine import create_db, drop_db, session_marker
+
+
+def get_storage():
+    redis = {
+        'user': 'user',
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0,
+        'password': os.getenv('REDISPASSWORD')
+    }
+    url = f"redis://:{redis['password']}@{redis['host']}:{redis['port']}/{redis['db']}"
+    return RedisStorage.from_url(url)
+
+
 
 ALLOWED_UPDATES = ['message, edited_message']
 bot = Bot(token=os.getenv('TOKEN'))
-
-dp = Dispatcher()
-admin_private_router.message.outer_middleware(CounterMiddleware())
-dp.include_routers(user_private_router, admin_private_router)
+dp = Dispatcher(storage=get_storage())
+dp.include_routers(admin_private_router, user_private_router)
 
 
 async def on_startup(bot):

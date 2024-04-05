@@ -1,6 +1,9 @@
+import calendar
+import datetime
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, delete, update
 
 
 async def orm_add_task(session: AsyncSession, data: dict):
@@ -22,6 +25,19 @@ async def check_new_user(session: AsyncSession, user_id: int):
     query = select(Users.user_id).where(Users.user_id == user_id)
     result = await session.execute(query)
     return result.all()
+
+
+async def check_sub_orm(session: AsyncSession, user_id: int):
+    query = select(Users).where(Users.user_id == user_id)
+    result = await session.execute(query)
+    return result.all()
+
+
+async def set_sub_orm(session: AsyncSession, user_id: int, months):
+    new_date = add_months(datetime.datetime.now(), months)
+    query = update(Users).where(Users.user_id == user_id).values(is_subscribe=True, day_end_subscribe=new_date)
+    await session.execute(query)
+    await session.commit()
 
 
 async def add_user(session: AsyncSession, user_id: int, username: str):
@@ -64,3 +80,11 @@ async def orm_get_prepare_module(session: AsyncSession, module=None, exam=None):
     query = select(Task.under_chapter).where((Task.chapter == module) & (Task.exam == exam)).distinct()
     result = await session.execute(query)
     return result
+
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return datetime.date(year, month, day)
