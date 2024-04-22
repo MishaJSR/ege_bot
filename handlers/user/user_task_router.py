@@ -3,6 +3,7 @@ from aiogram.filters import StateFilter
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+import random
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
@@ -152,14 +153,14 @@ async def start_train_choose(message: types.Message, state: FSMContext):
 
 async def cut_stare_and_prepare_answers(message, state):
     data = await state.get_data()
-    data['now_question'] = data['question_data'][-1]
-    data['question_data'].pop()
+    data['now_question'] = random.choice(data['question_data'])
+    data['question_data'].remove(data['now_question'])
     task_to_show = ''
     if data['now_question']['answer_mode'] == "Квиз":
         task_to_show += data['now_question']['description'] + '\n' + '\n'
         answer_arr = data['now_question']['answers'].split("` ")
         for ind, txt in enumerate(answer_arr):
-            task_to_show += f'{ind + 1}: {txt}' + '\n'
+            task_to_show += f'{ind + 1}. {txt}' + '\n'
     await state.set_data(data)
     await message.answer(task_to_show, reply_markup=train_kb())
     await state.set_state(UserTaskState.train_choose)
@@ -172,7 +173,7 @@ async def handle_correct_answer(message):
 async def handle_wrong_answer(message, correct_answers, explanation=""):
     if len(explanation) > 3:
         await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n'
-                             f'\n*Пояснение*: {explanation}', parse_mode="Markdown")
+                             f'\n*Пояснение*: \n{explanation}', parse_mode="Markdown")
     else:
         await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown")
 
