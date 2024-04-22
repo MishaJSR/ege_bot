@@ -1,9 +1,39 @@
 import calendar
 import datetime
+import sqlite3
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
 from sqlalchemy import select, delete, update
+import pandas as pd
+
+
+
+async def orm_transport_base(session: AsyncSession):
+    conn = sqlite3.connect('database.db')
+
+    # Запрос данных из базы данных в виде DataFrame
+    df = pd.read_sql_query("SELECT * FROM task", conn)
+    df = df.drop('id', axis=1)
+    conn.close()
+    for index, row in df.iterrows():
+        obj = Task(
+            exam=row['exam'],
+            chapter=row['chapter'],
+            under_chapter=row['under_chapter'],
+            description=row['description'],
+            answer_mode=row['answer_mode'],
+            answers=row['answers'],
+            answer=row['answer'],
+            about=row['about'],
+            addition=row['addition']
+        )
+        pass
+        session.add(obj)
+        await session.commit()
+
+
+
 
 
 async def orm_add_task(session: AsyncSession, data: dict):

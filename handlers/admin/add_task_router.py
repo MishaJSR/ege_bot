@@ -2,7 +2,7 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.orm_query import orm_add_task
+from database.orm_query import orm_add_task, orm_transport_base
 from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb, answers_kb_end, about_kb, answers_kb, \
     answer_kb, back_kb, chapter_kb, exam_kb
@@ -15,6 +15,15 @@ admin_add_task_router = Router()
 async def fill_admin_state(message: types.Message, state: FSMContext):
     await message.answer('Выберите раздел подготовки', reply_markup=exam_kb())
     await state.set_state(Admin_state.exam)
+
+
+@admin_add_task_router.message(F.text == 'Update tables')
+async def fill_admin_state(message: types.Message, session: AsyncSession, state: FSMContext):
+    try:
+        await orm_transport_base(session)
+    except:
+        await message.answer('Error')
+    await message.answer('Выберите раздел подготовки', reply_markup=exam_kb())
 
 
 @admin_add_task_router.message(Admin_state.exam)
