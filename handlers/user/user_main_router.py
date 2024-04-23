@@ -52,7 +52,7 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
         return
     if message.text == 'Начать подготовку':
         try:
-            res = await message.bot.get_chat_member(chat_id='-1002022380565', user_id=message.from_user.id)
+            res = await message.bot.get_chat_member(chat_id='@humanitiessociety', user_id=message.from_user.id)
             if res.status.value not in ['member', 'creator']:
                 raise Exception()
             await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
@@ -63,7 +63,7 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
     if message.text == 'Проверить подписку':
         await message.answer(f'Проверяем ...')
         try:
-            res = await message.bot.get_chat_member(chat_id='-1002022380565', user_id=message.from_user.id)
+            res = await message.bot.get_chat_member(chat_id='@humanitiessociety', user_id=message.from_user.id)
             if res.status.value not in ['member', 'creator']:
                 raise Exception()
         except:
