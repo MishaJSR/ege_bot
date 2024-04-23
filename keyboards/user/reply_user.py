@@ -73,6 +73,13 @@ def train_kb(data=None):
     return test_kb.as_markup(resize_keyboard=True)
 
 
+def next_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')
+    test_kb.button(text='Следующий ' + emoji.emojize(':right_arrow:'))
+    return test_kb.as_markup(resize_keyboard=True)
+
+
 def quiz_kb(data_mass=None, sizes: tuple[int] = (1,)):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text=emoji.emojize(':left_arrow:') + ' Назад')

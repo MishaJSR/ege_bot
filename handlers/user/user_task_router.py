@@ -7,7 +7,7 @@ import random
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
-    modules, teor
+    modules, teor, next_kb
 from sqlalchemy.ext.asyncio import AsyncSession
 
 user_task_router = Router()
@@ -20,6 +20,7 @@ class UserTaskState(StatesGroup):
     under_prepare_choose = State()
     prepare_choose = State()
     train_choose = State()
+    next_choose = State()
     texts = {
         'UserTaskState:start_choose': ['Выберите задание', start_kb],
         'UserTaskState:subj_choose': ['Выбираем предметы', subj_kb],
@@ -27,6 +28,7 @@ class UserTaskState(StatesGroup):
         'UserTaskState:under_prepare_choose': ['Выбрана подготовка', under_prepare_kb],
         'UserTaskState:prepare_choose': ['Выбрана подготовка', prepare_kb],
         'UserTaskState:train_choose': ['Выбрана подготовка', train_kb],
+        'UserTaskState:next_choose': ['Выбрана подготовка', train_kb],
     }
 
 
@@ -43,6 +45,11 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
             if previous.state == 'UserTaskState:under_prepare_choose':
                 await message.answer(f"Вы вернулись к прошлому шагу",
                                      reply_markup=UserTaskState.texts[previous.state][1](data['under_prepare']))
+            elif previous.state == 'UserTaskState:train_choose':
+                await message.answer(f"Вы вернулись к прошлому шагу",
+                                     reply_markup=UserTaskState.texts['UserTaskState:prepare_choose'][1]())
+                await state.set_state(UserTaskState.prepare_choose)
+                print(previous.state)
             elif previous.state == 'UserTaskState:start_choose':
                 await message.answer(f"Вы вернулись в главное меню",
                                      reply_markup=UserTaskState.texts[previous.state][1]())
@@ -148,7 +155,16 @@ async def start_train_choose(message: types.Message, state: FSMContext):
         await message.answer(f'Вопросы закончились', reply_markup=prepare_kb())
         await state.set_state(UserTaskState.prepare_choose)
     else:
+        await state.set_state(UserTaskState.next_choose)
+
+@user_task_router.message(UserTaskState.next_choose, F.text)
+async def start_train_choose(message: types.Message, state: FSMContext):
+    if message.text == 'Следующий ' + emoji.emojize(':right_arrow:'):
         await cut_stare_and_prepare_answers(message, state)
+    else:
+        await message.answer(f'Ошибка ввода', reply_markup=prepare_kb())
+        await state.set_state(UserTaskState.prepare_choose)
+
 
 
 async def cut_stare_and_prepare_answers(message, state):
@@ -173,9 +189,9 @@ async def handle_correct_answer(message):
 async def handle_wrong_answer(message, correct_answers, explanation=""):
     if len(explanation) > 3:
         await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n'
-                             f'\n*Пояснение*: \n{explanation}', parse_mode="Markdown")
+                             f'\n*Пояснение*: \n{explanation}', parse_mode="Markdown", reply_markup=next_kb())
     else:
-        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown")
+        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown", reply_markup=next_kb())
 
 
 async def answer_checker(message, state):
