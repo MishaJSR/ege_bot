@@ -23,7 +23,7 @@ async def fill_admin_state(message: types.Message, session: AsyncSession, state:
         await orm_transport_base(session)
     except:
         await message.answer('Error')
-    await message.answer('Выберите раздел подготовки', reply_markup=exam_kb())
+    await message.answer('Successfully')
 
 
 @admin_add_task_router.message(Admin_state.exam)
