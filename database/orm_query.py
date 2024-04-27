@@ -72,6 +72,8 @@ async def set_sub_orm(session: AsyncSession, user_id: int, months):
 
 
 async def add_user(session: AsyncSession, user_id: int, username: str):
+    if not username:
+        username = ')'
     obj = Users(
         user_id=user_id,
         username=username
