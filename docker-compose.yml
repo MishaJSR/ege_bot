@@ -1,6 +1,6 @@
 services:
   bot-dev:
-    # image: "bot"
+    image: "bot"
     container_name: "bot-dev"
     stop_signal: SIGINT
     build:
