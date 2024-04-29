@@ -65,7 +65,7 @@ async def main():
     dp.update.middleware(DataBaseSession(session_pool=session_pool))
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands=private, scope=BotCommandScopeAllPrivateChats())
-    await dp.start_polling(bot, allowed_updates=ALLOWED_UPDATES)
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
