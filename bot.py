@@ -1,3 +1,4 @@
+import logging
 import os
 import asyncio
 
@@ -5,6 +6,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommandScopeAllPrivateChats
 from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
 from dotenv import find_dotenv, load_dotenv
+import betterlogging as bl
 
 from database.config import load_config
 
@@ -23,9 +25,21 @@ def get_storage(config):
         key_builder=DefaultKeyBuilder(with_bot_id=True, with_destiny=True),
     )
 
+def setup_logging():
+    log_level = logging.INFO
+    bl.basic_colorized_config(level=log_level)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s",
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("Starting bot")
+
 
 
 ALLOWED_UPDATES = ['message, edited_message']
+logger = logging.getLogger(__name__)
 
 
 
@@ -38,6 +52,7 @@ async def on_shutdown(bot):
 
 
 async def main():
+    setup_logging()
     config = load_config()
     storage = get_storage(config)
 
@@ -55,4 +70,8 @@ async def main():
     await dp.start_polling(bot, allowed_updates=ALLOWED_UPDATES)
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.error("Бот был выключен!")
