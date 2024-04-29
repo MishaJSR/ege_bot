@@ -39,7 +39,6 @@ def setup_logging():
 
 
 ALLOWED_UPDATES = ['message, edited_message']
-logger = logging.getLogger(__name__)
 
 
 
