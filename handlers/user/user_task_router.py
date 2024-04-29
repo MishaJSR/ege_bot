@@ -4,6 +4,7 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 import random
+import logging
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
@@ -49,11 +50,11 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
                 await message.answer(f"Вы вернулись к прошлому шагу",
                                      reply_markup=UserTaskState.texts['UserTaskState:prepare_choose'][1]())
                 await state.set_state(UserTaskState.prepare_choose)
-                print(previous.state)
+                logging.info(previous.state)
             elif previous.state == 'UserTaskState:start_choose':
                 await message.answer(f"Вы вернулись в главное меню",
                                      reply_markup=UserTaskState.texts[previous.state][1]())
-                print(previous.state)
+                logging.info(previous.state)
             else:
                 await message.answer(f"Вы вернулись к прошлому шагу",
                                      reply_markup=UserTaskState.texts[previous.state][1]())
