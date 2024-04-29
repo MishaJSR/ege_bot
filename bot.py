@@ -38,7 +38,6 @@ def setup_logging():
 
 
 
-ALLOWED_UPDATES = ['message, edited_message']
 
 
 
