@@ -4,6 +4,8 @@ from sqlalchemy import engine_from_config, URL
 from sqlalchemy import pool
 from environs import Env
 
+from database.models import Base
+
 from alembic import context
 
 
@@ -28,9 +30,9 @@ url = URL.create(
 ).render_as_string(hide_password=False)
 
 config.set_main_option("sqlalchemy.url",
-                       url)
+                       url + '?async_fallback=True')
 
-target_metadata = None
+target_metadata = Base.metadata
 
 
 

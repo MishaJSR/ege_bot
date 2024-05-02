@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 class Task(Base):
     __tablename__ = 'task'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    exam: Mapped[str] = mapped_column(String(10), nullable=False)
+    exam: Mapped[str] = mapped_column(String(20), nullable=False)
     chapter: Mapped[str] = mapped_column(String(20), nullable=False)
     under_chapter: Mapped[str] = mapped_column(String(20), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)

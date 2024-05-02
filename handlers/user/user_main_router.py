@@ -35,7 +35,8 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
         res = await check_new_user(session, userid)
         if len(res) == 0:
             await add_user(session, userid, username)
-    except:
+    except Exception as e:
+        print(e)
         return
     text = f'Привет {message.from_user.username} ' + emoji.emojize(
         ':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
