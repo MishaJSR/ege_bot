@@ -39,7 +39,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
 
     previous = None
-    for step in UserTaskState.__all_states__:
+    async for step in get_generator(UserTaskState.__all_states__):
         if step.state == current_state:
             await state.set_state(previous)
             data = await state.get_data()
@@ -158,6 +158,7 @@ async def start_train_choose(message: types.Message, state: FSMContext):
     else:
         await state.set_state(UserTaskState.next_choose)
 
+
 @user_task_router.message(UserTaskState.next_choose, F.text)
 async def start_train_choose(message: types.Message, state: FSMContext):
     if message.text == 'Следующий ' + emoji.emojize(':right_arrow:'):
@@ -165,7 +166,6 @@ async def start_train_choose(message: types.Message, state: FSMContext):
     else:
         await message.answer(f'Ошибка ввода', reply_markup=prepare_kb())
         await state.set_state(UserTaskState.prepare_choose)
-
 
 
 async def cut_stare_and_prepare_answers(message, state):
@@ -192,7 +192,8 @@ async def handle_wrong_answer(message, correct_answers, explanation=""):
         await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n'
                              f'\n*Пояснение*: \n{explanation}', parse_mode="Markdown", reply_markup=next_kb())
     else:
-        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown", reply_markup=next_kb())
+        await message.answer(f'*Ошибка*\nПравильные ответы: {correct_answers}\n', parse_mode="Markdown",
+                             reply_markup=next_kb())
 
 
 async def answer_checker(message, state):
@@ -208,3 +209,8 @@ async def answer_checker(message, state):
             await handle_wrong_answer(message, data['now_question']['answer'], data['now_question']['about'])
     else:
         await handle_wrong_answer(message, data['now_question']['answer'], data['now_question']['about'])
+
+
+async def get_generator(arr: list):
+    for item in arr:
+        yield item
