@@ -1,3 +1,5 @@
+import logging
+
 import emoji
 from aiogram.filters import Command, or_f, StateFilter, CommandStart
 from aiogram import types, Router, F
@@ -36,8 +38,8 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
         if len(res) == 0:
             await add_user(session, userid, username)
     except Exception as e:
-        print(e)
-        return
+        logging.info(e)
+        await message.answer('Ошибка регистрации', reply_markup=start_kb())
     text = f'Привет {message.from_user.username} ' + emoji.emojize(
         ':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
     await message.answer(text, reply_markup=start_kb())
