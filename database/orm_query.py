@@ -6,11 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import Task, Users
 from sqlalchemy import select, delete, update
 import pandas as pd
+import re
 import subprocess
 
 
 
 async def orm_transport_base(session: AsyncSession):
+    query = delete(Task)
+    await session.execute(query)
+    await session.commit()
     conn = sqlite3.connect('database.db')
 
     # Запрос данных из базы данных в виде DataFrame
@@ -19,17 +23,15 @@ async def orm_transport_base(session: AsyncSession):
     conn.close()
     for index, row in df.iterrows():
         obj = Task(
-            exam=row['exam'],
-            chapter=row['chapter'],
-            under_chapter=row['under_chapter'],
-            description=row['description'],
-            answer_mode=row['answer_mode'],
-            answers=row['answers'],
-            answer=row['answer'],
-            about=row['about'],
-            addition=row['addition']
+            exam=str(row['exam']),
+            chapter=str(row['chapter']),
+            under_chapter=str(row['under_chapter']),
+            description=str(row['description']),
+            answer_mode=str(row['answer_mode']),
+            answers=str(row['answers']),
+            answer=str(row['answer']),
+            about=str(row['about']),
         )
-        pass
         session.add(obj)
         await session.commit()
 
@@ -102,6 +104,7 @@ async def delete_task(session: AsyncSession, description: int):
 
 async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_module=None, target_prepare=None,
                                target_under_prepare=None):
+    target_module = remove_emojis(target_module)[1:]
     if target_prepare == 'Практика':
         query = select(Task).where(
             (Task.exam == target_exam) & (Task.chapter == target_module) & (Task.under_chapter == target_under_prepare))
@@ -110,6 +113,7 @@ async def orm_get_modules_task(session: AsyncSession, target_exam=None, target_m
 
 
 async def orm_get_prepare_module(session: AsyncSession, module=None, exam=None):
+    module = remove_emojis(module)[1:]
     query = select(Task.under_chapter).where((Task.chapter == module) & (Task.exam == exam)).distinct()
     result = await session.execute(query)
     return result
@@ -121,3 +125,26 @@ def add_months(sourcedate, months):
     month = month % 12 + 1
     day = min(sourcedate.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
+
+def remove_emojis(text):
+    emoji_pattern = re.compile("["
+                           u"\U0001F600-\U0001F64F"  # emoticons
+                           u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                           u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                           u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           u"\U00002500-\U00002BEF"  # chinese char
+                           u"\U00002702-\U000027B0"
+                           u"\U00002702-\U000027B0"
+                           u"\U000024C2-\U0001F251"
+                           u"\U0001f926-\U0001f937"
+                           u"\U00010000-\U0010ffff"
+                           u"\u2640-\u2642"
+                           u"\u2600-\u2B55"
+                           u"\u200d"
+                           u"\u23cf"
+                           u"\u23e9"
+                           u"\u231a"
+                           u"\ufe0f"  # dingbats
+                           u"\u3030"
+                           "]+", flags=re.UNICODE)
+    return emoji_pattern.sub(r'', text)
