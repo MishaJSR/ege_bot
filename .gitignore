@@ -3,5 +3,5 @@
 pycache
 venv/
 .env
-.env.dev
+.env_copy
 database.db
