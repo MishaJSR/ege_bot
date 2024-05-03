@@ -7,6 +7,7 @@ import random
 import logging
 
 from database.orm_query import orm_get_modules_task, orm_get_prepare_module
+from keyboards.user.inline_user import get_inline
 from keyboards.user.reply_user import start_kb, prepare_kb, subj_kb, module_kb, train_kb, under_prepare_kb, main_but, \
     modules, teor, next_kb
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,7 +71,7 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
     data = await state.get_data()
     data['subj'] = message.text
     await state.set_data(data)
-    await message.answer(f'Выберите модуль для подготовки', reply_markup=module_kb())
+    await message.answer(f'Выберите раздел для подготовки', reply_markup=module_kb())
     await state.set_state(UserTaskState.module_choose)  #
 
 
@@ -78,6 +79,15 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
 async def start_module_choose(message: types.Message, session: AsyncSession, state: FSMContext):
     if message.text not in modules:
         await message.answer(f'Ошибка ввода')
+        return
+    try:
+        res = await message.bot.get_chat_member(chat_id='@humanitiessociety', user_id=message.from_user.id)
+        if res.status.value not in ['member', 'creator']:
+            raise Exception()
+    except:
+        await message.answer('Вы не подписаны на канал', reply_markup=get_inline())
+        await message.answer('После подписки вы сможете продолжить работу', reply_markup=start_kb())
+        await state.set_state(UserTaskState.start_choose)
         return
     data = await state.get_data()
     data['module'] = message.text

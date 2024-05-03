@@ -37,7 +37,7 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 @admin_add_task_router.message(Admin_state.chapter)
 async def fill_admin_state(message: types.Message, state: FSMContext):
     Admin_state.data['chapter'] = message.text
-    await message.answer('Напишите название подмодуля', reply_markup=back_kb())
+    await message.answer('Напишите название подраздела', reply_markup=back_kb())
     await state.set_state(Admin_state.under_chapter)
 
 

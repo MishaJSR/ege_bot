@@ -40,8 +40,8 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
     except Exception as e:
         logging.info(e)
         await message.answer('Ошибка регистрации', reply_markup=start_kb())
-    text = f'Привет {message.from_user.username} ' + emoji.emojize(
-        ':cat_with_wry_smile:') + '\nВ этом боте собрано более 600 практических задач по всем темам ЕГЭ' + '\nДля начала подготовки перейдите по кнопке Начало работы'
+    text = f'Привет {message.from_user.full_name} ' + emoji.emojize(
+        ':cat_with_wry_smile:') + '\nВ этом боте собрано более 600 практических задач по всем темам ЕГЭ' + '\nДля начала работы перейдите по кнопке Начать подготовку'
     await message.answer(text, reply_markup=start_kb())
     await state.set_state(UserState.start_user)
     UserTaskState.last_kb = start_kb()
@@ -58,7 +58,7 @@ async def start_subj_choose(message: types.Message, state: FSMContext):
             res = await message.bot.get_chat_member(chat_id='@humanitiessociety', user_id=message.from_user.id)
             if res.status.value not in ['member', 'creator']:
                 raise Exception()
-            await message.answer(f'Выберите задание к которому Вы бы хотели подготовиться', reply_markup=subj_kb())
+            await message.answer(f'В данный момент в бот добавлена только подготовка к основной части \nНо мы работаем над добавлением дополнительных модулей 😊', reply_markup=subj_kb())
             await state.set_state(UserTaskState.subj_choose)
         except:
             await message.answer('Вы не подписаны на канал', reply_markup=get_inline())
