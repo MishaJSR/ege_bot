@@ -100,6 +100,25 @@ def on_select(event):
     entry_under_chapter['values'] = new_values
     print(selected_value)
 
+
+def on_parsing():
+    selected_value = entry_parser.get()
+    text_split = selected_value.split('\n')
+    list_elem = []
+    counter = 0
+    list_area = [entry_description, entry_a1, entry_a2, entry_a3, entry_a4, entry_a5, entry_a6]
+    for index, line in enumerate(text_split):
+        el = line.strip()
+        if el == '':
+            continue
+        if index != 0:
+            el = el[4:-1]
+            list_area[counter].insert(0, el)
+        else:
+            entry_description.insert('1.0', el)
+        counter += 1
+    pass
+
 def on_button_click():
     exam = entry_exam.get()
     chapter = entry_chapter.get()
@@ -144,6 +163,7 @@ def on_button_click():
     entry_a4.delete(0, tk.END)
     entry_a5.delete(0, tk.END)
     entry_a6.delete(0, tk.END)
+    entry_parser.delete(0, tk.END)
 
 
 def paste_text(event):
@@ -174,9 +194,15 @@ label = tk.Label(root, text="Подглава")
 label.pack()
 entry_under_chapter = ttk.Combobox(root, values=[], width=60)
 entry_under_chapter.pack()
+label = tk.Label(root, text="Парсинг")
+label.pack()
+entry_parser = tk.Entry(root, width=30)
+entry_parser.pack()
+button_parser = tk.Button(root, text="Запарсить", command=on_parsing)
+button_parser.pack()
 label = tk.Label(root, text="Описание")
 label.pack()
-entry_description = tk.Text(root, height=8, width=80)
+entry_description = tk.Text(root, height=7, width=80)
 entry_description.pack()
 label = tk.Label(root, text="Ответ 1")
 label.pack()

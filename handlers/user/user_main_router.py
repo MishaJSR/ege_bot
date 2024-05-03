@@ -41,7 +41,7 @@ async def start_cmd(message: types.Message, session: AsyncSession, state: FSMCon
         logging.info(e)
         await message.answer('Ошибка регистрации', reply_markup=start_kb())
     text = f'Привет {message.from_user.username} ' + emoji.emojize(
-        ':cat_with_wry_smile:') + '\nВыбери к чему ты бы хотел подготовиться'
+        ':cat_with_wry_smile:') + '\nВ этом боте собрано более 600 практических задач по всем темам ЕГЭ' + '\nДля начала подготовки перейдите по кнопке Начало работы'
     await message.answer(text, reply_markup=start_kb())
     await state.set_state(UserState.start_user)
     UserTaskState.last_kb = start_kb()
