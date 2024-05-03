@@ -119,6 +119,13 @@ def on_parsing():
         counter += 1
     pass
 
+def on_parsing_clear():
+    about = entry_about.get("1.0", "end-1c")
+    modified_string = about.replace("\n\n", "\n")
+    entry_about.delete("1.0", tk.END)
+    entry_about.insert('1.0', modified_string)
+
+
 def on_button_click():
     exam = entry_exam.get()
     chapter = entry_chapter.get()
@@ -202,7 +209,7 @@ button_parser = tk.Button(root, text="Запарсить", command=on_parsing)
 button_parser.pack()
 label = tk.Label(root, text="Описание")
 label.pack()
-entry_description = tk.Text(root, height=7, width=80)
+entry_description = tk.Text(root, height=5, width=80)
 entry_description.pack()
 label = tk.Label(root, text="Ответ 1")
 label.pack()
@@ -239,6 +246,8 @@ entry_about.pack()
 
 
 # Создаем кнопку
+button = tk.Button(root, text="Отчистить", command=on_parsing_clear)
+button.pack()
 button = tk.Button(root, text="Добавить в базу данных", command=on_button_click)
 button.pack()
 
