@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config, URL
 from sqlalchemy import pool
 from environs import Env
 
+from config import DbConfig
 from database.models import Base
 
 from alembic import context
@@ -15,19 +16,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-env = Env()
-env.read_env('.env')
 
-print(env)
-
-url = URL.create(
-    drivername=f"postgresql+asyncpg",
-    host=env.str("DB_HOST"),
-    password=env.str("POSTGRES_PASSWORD"),
-    username=env.str("POSTGRES_USER"),
-    database=env.str("POSTGRES_DB"),
-    port=5432,
-).render_as_string(hide_password=False)
+url = DbConfig.get_url()
 
 config.set_main_option("sqlalchemy.url",
                        url + '?async_fallback=True')

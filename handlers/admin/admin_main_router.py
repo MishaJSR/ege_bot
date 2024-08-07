@@ -7,12 +7,8 @@ from filters.admin_filter import AdminFilter
 from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb
 from handlers.admin.states import Admin_state
-from handlers.admin.admin_spammer_router import admin_spammer_router
-from handlers.admin.add_task_router import admin_add_task_router
-from handlers.admin.delete_task_router import admin_delete_task_router
 
 admin_private_router = Router()
-admin_private_router.include_routers(admin_spammer_router, admin_add_task_router, admin_delete_task_router)
 admin_private_router.message.filter(AdminFilter())
 load_dotenv(find_dotenv())
 

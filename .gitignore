@@ -5,3 +5,5 @@ venv/
 .env
 .env_copy
 database.db
+migrations
+alembic.ini

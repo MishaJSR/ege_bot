@@ -152,7 +152,7 @@ def on_button_click():
     a = entry_a.get()
     updated = '2024-03-19 11:44:19'
     about = entry_about.get("1.0", "end-1c")
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('../database.db')
     c = conn.cursor()
     data = (exam, chapter, under_chapter, description, 'Квиз', res_str, a, about, updated)
     c.execute('INSERT INTO task (exam, chapter, under_chapter, description, answer_mode, answers, answer, about, updated) VALUES (?,?,?,?,?,?,?,?,?)', data)

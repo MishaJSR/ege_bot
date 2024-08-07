@@ -7,9 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from dotenv import find_dotenv, load_dotenv
 
-load_dotenv(find_dotenv())
-admin = int(os.getenv('ADMIN_ID'))
-
 
 class DataBaseSession(BaseMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
