@@ -1,12 +1,9 @@
-import os
-
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from dotenv import find_dotenv, load_dotenv
 
-from config import load_config
+from utils.env_config import load_config
 
-admin_ids = []
+admin_ids = load_config().tg_bot.admin_ids
 
 
 class AdminFilter(BaseFilter):

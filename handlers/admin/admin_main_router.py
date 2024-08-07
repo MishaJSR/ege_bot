@@ -3,6 +3,8 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from dotenv import find_dotenv, load_dotenv
 
+from database.models import UserRepository, TaskRepository
+from database.utils.construct_shemas import ConstructUser, ConstructTask
 from filters.admin_filter import AdminFilter
 from keyboards.user.reply_user import start_kb
 from keyboards.admin.reply_admin import start_kb
@@ -16,32 +18,23 @@ load_dotenv(find_dotenv())
 @admin_private_router.message(Command('admin'))
 async def fill_admin_state(message: types.Message, state: FSMContext):
     await message.answer(text='Привет админ', reply_markup=start_kb())
-    await state.set_state(Admin_state.start)
+    dictionary = ConstructUser(user_id=message.from_user.id,
+                               username=message.from_user.full_name,
+                               is_subscribe=True).model_dump()
+    task = ConstructTask(exam="Bnddfd",
+                         chapter="Bnddfd",
+                         under_chapter="Bnddfd",
+                         description="Bnddfd",
+                         answer_mode="Bnddfd",
+                         answers="Bnddfd",
+                         answer="Bnddfd",
+                         ).model_dump()
+    pass
+    res1 = await UserRepository().add_object(data=dictionary)
+    res2 = await TaskRepository().add_object(data=task)
+    pass
+    # res2 = await UserRepository().get_all_by_fields(data=user_fields, field_filter=field_filter2)
 
-
-@admin_private_router.message(StateFilter('*'), Command("назад"))
-@admin_private_router.message(StateFilter('*'), F.text.casefold() == "назад")
-async def back_step_handler(message: types.Message, state: FSMContext) -> None:
-    current_state = await state.get_state()
-
-    if current_state == Admin_state.start:
-        await message.answer('Предыдущего шага нет')
-        return
-
-    previous = None
-    for step in Admin_state.__all_states__:
-        if step.state == current_state:
-            await state.set_state(previous)
-            await message.answer(f"Вы вернулись к прошлому шагу \n{Admin_state.texts[previous.state][0]}",
-                                 reply_markup=Admin_state.texts[previous.state][1]())
-            return
-        previous = step
-
-
-@admin_private_router.message(F.text == 'Отмена')
-async def fill_admin_state(message: types.Message, state: FSMContext):
-    await message.answer(text='Вы вернулись в основное меню', reply_markup=start_kb())
-    await state.set_state(Admin_state.start)
 
 
 
