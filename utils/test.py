@@ -30,26 +30,32 @@ for file in all_files:
         answer_mode = None
         answers = ""
         answer = None
-        about = None
+        about = ""
         addition = None
         pp = el.split("\n")
+        ind_pp = 0
         if len(pp) == 1:
             under_chapter = pp[0]
         else:
-            description = pp[0]
+            if len(pp[0]) == 0:
+                ind_pp = 1
+            description = pp[ind_pp]
             if "Пояснение. " in pp:
                 index_about = pp.index("Пояснение. ")
-                for answers_text in pp[1:index_about]:
+                for answers_text in pp[ind_pp+1:index_about]:
                     answers += answers_text.replace(")", ".") + '\n'
-                about = pp[index_about + 1].replace(")", ".")
+                for ab_el in pp[index_about + 1:-1]:
+                    about += ab_el.replace(")", ".")
                 answer = pp[-1].split("Ответ:")[1].replace(".", "")
             else:
-                for answers_text in pp[1:-1]:
+                for answers_text in pp[ind_pp+1:-1]:
                     answers += answers_text.replace(")", ".") + '\n'
                 answer = pp[-1].split("Ответ:")[1].replace(".", "")
-                pass
-            print("Описание\n", description)
-            print("Ответы\n", answers)
-            print("Пояснение\n", about)
-            print("Ответ\n", answer)
-            print("\n\n")
+            if about == "":
+                about = None
+            if description[0].isdigit():
+                if description[1].isdigit():
+                    description = description[4:]
+                else:
+                    description = description[3:]
+            print("Документ\n", under_chapter)
