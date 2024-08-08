@@ -14,9 +14,12 @@ SUCCESS_TEST = "*Правильно*\n\nПродолжим?"
 NOT_SUCCESS_TEST = "*Неправильно*\n*Правильный ответ:* "
 ABOUT_TEST = "*Пояснение*:\n\n"
 END_TEST = "Задания закончились"
+NEXT_CHAPTER = "Переход далее"
 
 TEXT_READY_TEST = "Вперед ➡"
 BACK_BUTTON = "⬅ Назад"
+RETURN_BUTTON = "⬅ Обратно"
+MORE_BUTTON = "Далее ➡"
 NEXT_BUTTON = "Следующий ➡"
 
 SHOW_ABOUT_TEXT = "Показать пояснение ⬇"

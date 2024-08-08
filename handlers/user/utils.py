@@ -24,7 +24,6 @@ async def send_question(message: types.Message, user_state, state: FSMContext) -
         await state.set_state(user_state.answer_mode)
 
 
-
 async def check_user(user_id: int) -> str | bool:
     user_field = ["username"]
     user_filter = {
@@ -66,3 +65,7 @@ async def get_questions(under_chapter) -> AlchemyDataObject:
     task_filter = {"under_chapter": under_chapter}
     rows = await TaskRepository().get_all_by_fields(data=task_fields, field_filter=task_filter)
     return rows
+
+
+def split_array(arr, chunk_size):
+    return [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]

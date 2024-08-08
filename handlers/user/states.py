@@ -26,6 +26,7 @@ class UserState(StatesGroup):
     }
     list_of_chapters = []
     list_of_under_chapters = []
+    index_now_under_chapter = 0
     questions = []
     select_under_chapter = None
     now_question = []

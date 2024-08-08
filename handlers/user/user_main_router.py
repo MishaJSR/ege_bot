@@ -21,7 +21,14 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
 
     if current_state == UserState.answer_mode:
         await message.answer("Вы вернулись к прошлому шагу")
-        await message.answer(TEXT_UNDER_CHAPTER, reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
+        UserState.index_now_under_chapter = 0
+        if len(UserState.list_of_under_chapters) == 1:
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
+        else:
+            UserState.index_now_under_chapter = 0
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[0], is_more=True))
         await state.set_state(UserState.under_chapter)
         return
 
@@ -80,13 +87,41 @@ async def user_press_chapter(message: types.Message, state: FSMContext):
         await message.answer(DONT_UNDERSTAND)
         return
     UserState.list_of_under_chapters = await get_all_under_chapters(chapter=message.text)
-    await message.answer(TEXT_UNDER_CHAPTER, reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
+    UserState.list_of_under_chapters = split_array(UserState.list_of_under_chapters, 6)
+    if len(UserState.list_of_under_chapters) == 1:
+        await message.answer(TEXT_UNDER_CHAPTER,
+                             reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
+    else:
+        UserState.index_now_under_chapter = 0
+        await message.answer(TEXT_UNDER_CHAPTER,
+                             reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[0], is_more=True))
     await state.set_state(UserState.under_chapter)
+
+
+@user_private_router.message(UserState.under_chapter, F.text == MORE_BUTTON)
+async def user_press_under_chapter(message: types.Message):
+    UserState.index_now_under_chapter += 1
+    cur_ind = UserState.index_now_under_chapter
+    is_return = False
+    if cur_ind != 0:
+        is_return = True
+    try:
+        res = UserState.list_of_under_chapters[UserState.index_now_under_chapter]
+        if len(UserState.list_of_under_chapters) - 1 == cur_ind:
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[cur_ind],
+                                                               is_return=True))
+        else:
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[cur_ind],
+                                                               is_more=True, is_return=is_return))
+    except Exception as e:
+        await message.answer("Больше нет")
 
 
 @user_private_router.message(UserState.under_chapter, F.text)
 async def user_press_under_chapter(message: types.Message, state: FSMContext):
-    if message.text not in UserState.list_of_under_chapters:
+    if message.text not in UserState.list_of_under_chapters[UserState.index_now_under_chapter]:
         await message.answer(DONT_UNDERSTAND)
         return
     UserState.select_under_chapter = message.text

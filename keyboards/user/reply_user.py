@@ -36,11 +36,16 @@ def chapter_kb(data=None):
     return test_kb.as_markup(resize_keyboard=True)
 
 
-def under_chapter_kb(data=None):
+def under_chapter_kb(data=None, is_more=False, is_return=False):
     test_kb = ReplyKeyboardBuilder()
-    test_kb.button(text=BACK_BUTTON)
+    if is_return:
+        test_kb.button(text=RETURN_BUTTON)
+    else:
+        test_kb.button(text=BACK_BUTTON)
     for but in data:
         test_kb.button(text=but)
+    if is_more:
+        test_kb.button(text=MORE_BUTTON)
     test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
 
