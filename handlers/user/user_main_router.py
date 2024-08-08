@@ -1,10 +1,8 @@
 import uuid
 
-from aiogram import types, Router, F
+from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
-from aiogram.fsm.context import FSMContext
 
-from handlers.user.states import UserState
 from handlers.user.utils import *
 from keyboards.user.inline_user import get_inline_channel, get_inline_about
 from keyboards.user.reply_user import *

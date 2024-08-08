@@ -55,9 +55,9 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
 
 @admin_private_router.message(Command('load'))
 async def fill_admin_state(message: types.Message, state: FSMContext):
-    directory_path = os.getcwd() + '\\utils\\loader\\human'
+    directory_path = os.getcwd() + '\\utils\\loader\\pravo'
     all_files = get_all_files_in_directory(directory_path)
     for file in all_files:
-        await load_to_db(file, chapter="Человек и общество")
+        await load_to_db(file, chapter="Право 🕊")
 
 

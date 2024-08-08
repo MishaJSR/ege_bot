@@ -48,6 +48,8 @@ async def load_to_db(file, chapter):
             if len(pp[0]) == 0:
                 ind_pp = 1
             description = pp[ind_pp]
+            if description == "Выберите верные суждения о роли государства в рыночной экономике. Запишите цифры, под которыми они указаны.":
+                pass
             if "Пояснение. " in pp:
                 index_about = pp.index("Пояснение. ")
                 for answers_text in pp[ind_pp + 1:index_about]:
@@ -66,6 +68,8 @@ async def load_to_db(file, chapter):
                     description = description[4:]
                 else:
                     description = description[3:]
+            print(file)
+            print(description)
             task = ConstructTask(chapter=chapter,
                                  under_chapter=under_chapter,
                                  description=description,
