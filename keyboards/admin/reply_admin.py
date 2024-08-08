@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from keyboards.user.reply_user import main_but, modules
+from keyboards.user.reply_user import main_but
 
 
 def start_kb(data=None):
@@ -22,7 +22,7 @@ def exam_kb(data=main_but):
     return test_kb.as_markup(resize_keyboard=True)
 
 
-def chapter_kb(data=modules):
+def chapter_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text='Назад')
     for el in data:

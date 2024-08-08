@@ -13,12 +13,16 @@ def async_session_maker_decorator(func):
             async with async_session_maker() as session:
                 field_filter = kwargs.get("field_filter")
                 data = kwargs.get("data")
+                distinct = kwargs.get("distinct")
                 if not kwargs.get("field_filter"):
                     field_filter = {}
                 if not data:
                     raise CustomException(message="Expecting kwargs data")
                 try:
-                    query = select(*[getattr(self_object.model, field) for field in data])
+                    if distinct:
+                        query = select(*[getattr(self_object.model, field) for field in data]).distinct()
+                    else:
+                        query = select(*[getattr(self_object.model, field) for field in data])
                 except AttributeError:
                     raise CustomException(message="Unknown fields in data")
                 try:

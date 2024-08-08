@@ -1,0 +1,1 @@
+url_of_channel = "https://t.me/humanitiessociety"
