@@ -8,8 +8,8 @@ from aiogram.types import ReplyKeyboardRemove
 from database.models import UserRepository, TaskRepository
 from database.utils.AlchemyDataObject import AlchemyDataObject
 from database.utils.construct_shemas import ConstructUser
-from handlers.user.states import UserState
-from keyboards.user.reply_user import answer_mode_kb
+from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb
+from utils.common.static_text import *
 
 
 async def send_question(message: types.Message, user_state, state: FSMContext) -> object:
@@ -65,6 +65,35 @@ async def get_questions(under_chapter) -> AlchemyDataObject:
     task_filter = {"under_chapter": under_chapter}
     rows = await TaskRepository().get_all_by_fields(data=task_fields, field_filter=task_filter)
     return rows
+
+
+async def go_to_under_chapters(message: types.Message, user_state):
+    if len(user_state.list_of_under_chapters) == 1:
+        await message.answer(TEXT_UNDER_CHAPTER,
+                             reply_markup=under_chapter_kb(data=user_state.list_of_under_chapters))
+    else:
+        user_state.index_now_under_chapter = 0
+        await message.answer(TEXT_UNDER_CHAPTER,
+                             reply_markup=under_chapter_kb(data=user_state.list_of_under_chapters[0], is_more=True))
+
+async def update_under_chapters(message: types.Message, user_state):
+    cur_ind = user_state.index_now_under_chapter
+    has_more_button = len(user_state.list_of_under_chapters) - 1 == cur_ind
+    is_return = False
+    if cur_ind != 0:
+        is_return = True
+    if user_state.index_now_under_chapter < len(user_state.list_of_under_chapters):
+        if has_more_button:
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=user_state.list_of_under_chapters[cur_ind],
+                                                               is_return=True))
+        else:
+            await message.answer(TEXT_UNDER_CHAPTER,
+                                 reply_markup=under_chapter_kb(data=user_state.list_of_under_chapters[cur_ind],
+                                                               is_more=True,
+                                                               is_return=is_return))
+    else:
+        await message.answer(EMPTY_UNDER_CHAPTERS)
 
 
 def split_array(arr, chunk_size):

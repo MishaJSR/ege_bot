@@ -3,6 +3,7 @@ import uuid
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 
+from handlers.user.states import UserState
 from handlers.user.utils import *
 from keyboards.user.inline_user import get_inline_channel, get_inline_about
 from keyboards.user.reply_user import *
@@ -22,13 +23,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     if current_state == UserState.answer_mode:
         await message.answer("Вы вернулись к прошлому шагу")
         UserState.index_now_under_chapter = 0
-        if len(UserState.list_of_under_chapters) == 1:
-            await message.answer(TEXT_UNDER_CHAPTER,
-                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
-        else:
-            UserState.index_now_under_chapter = 0
-            await message.answer(TEXT_UNDER_CHAPTER,
-                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[0], is_more=True))
+        await go_to_under_chapters(message=message, user_state=UserState)
         await state.set_state(UserState.under_chapter)
         return
 
@@ -88,35 +83,20 @@ async def user_press_chapter(message: types.Message, state: FSMContext):
         return
     UserState.list_of_under_chapters = await get_all_under_chapters(chapter=message.text)
     UserState.list_of_under_chapters = split_array(UserState.list_of_under_chapters, 6)
-    if len(UserState.list_of_under_chapters) == 1:
-        await message.answer(TEXT_UNDER_CHAPTER,
-                             reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters))
-    else:
-        UserState.index_now_under_chapter = 0
-        await message.answer(TEXT_UNDER_CHAPTER,
-                             reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[0], is_more=True))
+    await go_to_under_chapters(message=message, user_state=UserState)
     await state.set_state(UserState.under_chapter)
 
 
+@user_private_router.message(UserState.under_chapter, F.text == RETURN_BUTTON)
+async def user_press_under_chapter_return(message: types.Message):
+    UserState.index_now_under_chapter -= 1
+    await update_under_chapters(message=message, user_state=UserState)
+
+
 @user_private_router.message(UserState.under_chapter, F.text == MORE_BUTTON)
-async def user_press_under_chapter(message: types.Message):
+async def user_press_under_chapter_more(message: types.Message):
     UserState.index_now_under_chapter += 1
-    cur_ind = UserState.index_now_under_chapter
-    is_return = False
-    if cur_ind != 0:
-        is_return = True
-    try:
-        res = UserState.list_of_under_chapters[UserState.index_now_under_chapter]
-        if len(UserState.list_of_under_chapters) - 1 == cur_ind:
-            await message.answer(TEXT_UNDER_CHAPTER,
-                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[cur_ind],
-                                                               is_return=True))
-        else:
-            await message.answer(TEXT_UNDER_CHAPTER,
-                                 reply_markup=under_chapter_kb(data=UserState.list_of_under_chapters[cur_ind],
-                                                               is_more=True, is_return=is_return))
-    except Exception as e:
-        await message.answer("Больше нет")
+    await update_under_chapters(message=message, user_state=UserState)
 
 
 @user_private_router.message(UserState.under_chapter, F.text)
@@ -151,7 +131,7 @@ async def user_press_ready_to_test(message: types.Message, state: FSMContext):
 
 
 @user_private_router.message(UserState.answers_checker, F.text != NEXT_BUTTON)
-async def user_first_test(message: types.Message, state: FSMContext):
+async def user_first_test(message: types.Message):
     if not message.text.isdigit():
         await message.answer(DONT_UNDERSTAND)
         await message.answer(SHORT_INTRODUCE_TEST)
@@ -160,12 +140,9 @@ async def user_first_test(message: types.Message, state: FSMContext):
         await message.answer(SUCCESS_TEST, reply_markup=next_kb(), parse_mode="Markdown")
     else:
         text_to_send = f"{NOT_SUCCESS_TEST}{UserState.now_question.answer}\n\n"
-        await message.answer(text_to_send,
-                             reply_markup=next_kb(),
-                             parse_mode="Markdown")
+        await message.answer(text_to_send, reply_markup=next_kb(), parse_mode="Markdown")
     if UserState.now_question.about:
-        mess = await message.answer(SHOW_ABOUT_TEXT,
-                                    reply_markup=get_inline_about())
+        mess = await message.answer(SHOW_ABOUT_TEXT, reply_markup=get_inline_about())
         UserState.last_message_id = mess.message_id
 
 
@@ -182,5 +159,4 @@ async def check_button(call: types.CallbackQuery):
     await call.message.delete()
     UserState.last_message_id = None
     await call.answer("Пояснение")
-    await call.message.answer(f"{ABOUT_TEST}{UserState.now_question.about}",
-                              parse_mode="Markdown")
+    await call.message.answer(f"{ABOUT_TEST}{UserState.now_question.about}", parse_mode="Markdown")
