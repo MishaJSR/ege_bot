@@ -1,7 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
-from utils.env_config import load_config
+from env_config import load_config
 
 admin_ids = load_config().tg_bot.admin_ids
 

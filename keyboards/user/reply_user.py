@@ -2,7 +2,7 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import emoji
 
-from utils.common.static_text import *
+from utils.common.static_user import *
 
 start_but = ['Начать подготовку']
 # main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']

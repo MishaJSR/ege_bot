@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from utils.env_config import DbConfig
+from env_config import DbConfig
 
 engine = create_async_engine(DbConfig.get_url())
 async_session_maker = async_sessionmaker(bind=engine, expire_on_commit=False)

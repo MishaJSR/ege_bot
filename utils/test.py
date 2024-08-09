@@ -4,7 +4,7 @@ from os.path import isfile, join
 from docx import Document
 
 from database.models import TaskRepository
-from database.utils.construct_shemas import ConstructTask
+from database.utils.construct_schemas import ConstructTask
 
 
 def extract_text_from_docx(file_path):

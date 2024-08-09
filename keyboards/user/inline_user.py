@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from utils.common.static_text import *
+from utils.common.static_user import *
 from utils.common.static_url import url_of_channel
 
 

@@ -11,8 +11,6 @@ TEXT_START_TEST = "Начало теста"
 DONT_UNDERSTAND = "Я не понимаю тебя"
 EMPTY_UNDER_CHAPTERS = "Больше нет"
 
-
-
 SHORT_INTRODUCE_TEST = "Нужно ввести 123"
 SUCCESS_TEST = "*Правильно*\n\nПродолжим?"
 NOT_SUCCESS_TEST = "*Неправильно*\n*Правильный ответ:* "

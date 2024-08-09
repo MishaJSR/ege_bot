@@ -7,9 +7,9 @@ from aiogram.types import ReplyKeyboardRemove
 
 from database.models import UserRepository, TaskRepository
 from database.utils.AlchemyDataObject import AlchemyDataObject
-from database.utils.construct_shemas import ConstructUser
+from database.utils.construct_schemas import ConstructUser
 from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb
-from utils.common.static_text import *
+from utils.common.static_user import *
 
 
 async def send_question(message: types.Message, user_state, state: FSMContext) -> object:
@@ -75,6 +75,7 @@ async def go_to_under_chapters(message: types.Message, user_state):
         user_state.index_now_under_chapter = 0
         await message.answer(TEXT_UNDER_CHAPTER,
                              reply_markup=under_chapter_kb(data=user_state.list_of_under_chapters[0], is_more=True))
+
 
 async def update_under_chapters(message: types.Message, user_state):
     cur_ind = user_state.index_now_under_chapter

@@ -7,7 +7,7 @@ from aiogram.types import BotCommandScopeAllPrivateChats
 from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
 import betterlogging as bl
 
-from utils.env_config import load_config
+from env_config import load_config
 from handlers.user.user_main_router import user_private_router
 from handlers.admin.admin_main_router import admin_private_router
 from utils.common.bot_cmd_list import private
@@ -33,21 +33,17 @@ def setup_logging():
         level=logging.INFO,
         format="%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s",
     )
-    logger = logging.getLogger(__name__)
-    logger.info("Starting bot")
 
 
-async def on_startup(bot):
-    print('Bot start')
+async def on_startup():
+    logging.info("Starting bot")
 
 
 async def on_shutdown(bot):
-    print('Bot end')
+    logging.info("Shutdown bot")
 
 
 async def main():
-    print('start')
-
     setup_logging()
     config = load_config()
     storage = get_storage(config)

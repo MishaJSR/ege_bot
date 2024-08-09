@@ -1,13 +1,11 @@
-import uuid
-
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter
 
-from handlers.user.states import UserState
+from handlers.user.state import UserState
 from handlers.user.utils import *
 from keyboards.user.inline_user import get_inline_channel, get_inline_about
 from keyboards.user.reply_user import *
-from utils.common.static_text import *
+from utils.common.static_user import *
 
 user_private_router = Router()
 
@@ -28,6 +26,10 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         return
 
     if current_state == UserState.under_chapter:
+        res = await message.bot.get_chat_member(chat_id='@humanitiessociety', user_id=message.from_user.id)
+        if res.status.value not in ['member', 'creator']:
+            await message.answer(TEXT_NOT_SUBSCRIBE_CHANNEL, reply_markup=get_inline_channel())
+            return
         await message.answer("Вы вернулись к прошлому шагу")
         await message.answer(TEXT_CHAPTER, reply_markup=chapter_kb(data=UserState.list_of_chapters))
         await state.set_state(UserState.chapter)
