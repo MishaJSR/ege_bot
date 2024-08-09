@@ -77,6 +77,7 @@ async def load_to_db(file, chapter):
                                  answers=answers,
                                  answer=answer,
                                  about=about,
-                                 addition=addition
+                                 addition=addition,
+                                 progress=0
                                  ).model_dump()
             res2 = await TaskRepository().add_object(data=task)

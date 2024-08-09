@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Text, DateTime, func, Boolean, BigInteger
+from sqlalchemy import String, Text, DateTime, func, Boolean, BigInteger, Integer
 
 from database.repository import SQLAlchemyRepository
 
@@ -27,6 +27,7 @@ class Task(Base):
     answer: Mapped[str] = mapped_column(Text, nullable=False)
     about: Mapped[str] = mapped_column(Text, nullable=True)
     addition: Mapped[str] = mapped_column(Text, nullable=True)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
 class UserRepository(SQLAlchemyRepository):
