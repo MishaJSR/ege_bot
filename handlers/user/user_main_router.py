@@ -1,5 +1,8 @@
+import logging
+
 from aiogram import Router, F
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import CommandStart, StateFilter, ChatMemberUpdatedFilter, KICKED, Command
+from aiogram.types import ChatMemberUpdated
 
 from handlers.user.state import UserState
 from handlers.user.utils import *
@@ -8,6 +11,24 @@ from keyboards.user.reply_user import *
 from utils.common.static_user import *
 
 user_private_router = Router()
+
+
+#
+# @user_private_router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=KICKED))
+# async def user_blocked_bot(event: ChatMemberUpdated):
+#     data = {
+#         "user_id": 548349299
+#     }
+#     res = await UserRepository().update_fields(data=data)
+#
+
+@user_private_router.message(Command("test"))
+async def user_blocked_bot(message: types.Message, state: FSMContext):
+    data = {
+        "user_id": 548349299
+    }
+    res = await UserRepository().u(data=data)
+    print(res)
 
 
 @user_private_router.message(StateFilter(UserState), F.text == BACK_BUTTON)

@@ -1,7 +1,7 @@
 services:
-  bot-dev:
+  bot-ege:
     image: "bot"
-    container_name: "bot-dev"
+    container_name: "bot-ege"
     stop_signal: SIGINT
     build:
       context: ./

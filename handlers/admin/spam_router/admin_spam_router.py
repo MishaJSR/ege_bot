@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 import validators
 
 from handlers.admin.spam_router.state import AdminSpamState
-from handlers.admin.spam_router.utils import send_demo
+from handlers.admin.spam_router.utils import send_demo, send_spam
 from handlers.admin.state import AdminState
 from keyboards.admin.inline_admin import make_markup_kb
 from keyboards.admin.reply_admin import *
@@ -63,7 +63,8 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 @admin_spam_router.message(AdminSpamState.show_post, F.text == BUTTON_CONFIRM)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
     await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())
-    await state.set_state(AdminSpamState.show_post)
+    await send_spam(message, AdminSpamState)
+    await state.set_state(AdminState.start)
 
 
 @admin_spam_router.message(AdminSpamState.show_post, F.text == BUTTON_NOT_CONFIRM)

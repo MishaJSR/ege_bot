@@ -13,7 +13,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     username: Mapped[str] = mapped_column(Text, nullable=False)
-    is_subscribe: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_subscribe: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
 
 class Task(Base):

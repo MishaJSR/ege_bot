@@ -7,7 +7,7 @@ from database.engine import async_session_maker
 from database.exeptions import CustomException
 
 
-def async_session_maker_decorator(func):
+def async_session_maker_decorator_select(func):
     async def wrapper(self_object, **kwargs):
         try:
             async with async_session_maker() as session:

@@ -35,11 +35,11 @@ async def check_user(user_id: int) -> str | bool:
     return False
 
 
-async def add_new_user(user_id: int, username: str, is_subscribe: bool = False):
+async def add_new_user(user_id: int, username: str):
     try:
         new_user = ConstructUser(user_id=user_id,
                                  username=username,
-                                 is_subscribe=is_subscribe).model_dump()
+                                 is_subscribe=True).model_dump()
         await UserRepository().add_object(data=new_user)
     except Exception as e:
         logging.info(f"Ошибка регистрации пользователя {e}")
