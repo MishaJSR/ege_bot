@@ -34,3 +34,5 @@ async def fill_admin_state(message: types.Message, state: FSMContext):
     for file in all_files:
         await load_to_db(file, chapter="Политика 🏢")
 
+
+
