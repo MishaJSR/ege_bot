@@ -12,7 +12,6 @@ from handlers.admin.spam_router.admin_spam_router import admin_spam_router
 from handlers.admin.state import AdminState
 from keyboards.admin.reply_admin import start_kb
 from utils.common.static_admin import *
-from utils.test import get_all_files_in_directory, load_to_db
 
 admin_private_router = Router()
 admin_private_router.include_routers(admin_add_router, admin_spam_router)
@@ -24,15 +23,6 @@ async def admin_start(message: types.Message, state: FSMContext):
     await message.answer(text=HELLO_ADMIN, reply_markup=start_kb())
     await state.set_state(AdminState.start)
 
-
-
-
-@admin_private_router.message(Command('load'))
-async def fill_admin_state(message: types.Message, state: FSMContext):
-    directory_path = os.getcwd() + '\\utils\\loader\\politic'
-    all_files = get_all_files_in_directory(directory_path)
-    for file in all_files:
-        await load_to_db(file, chapter="Политика 🏢")
 
 
 
