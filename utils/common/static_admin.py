@@ -8,9 +8,15 @@ CONFIRM_TEXT = "Все верно?"
 SEND_BUTTON_LINK = "Отправьте ссылку для кнопки"
 RETURN_BACK = "Отправьте ссылку для кнопки"
 
+RETURN_IN_MAIN_ADMIN = "Вы вернулись в главное меню"
+ADD_POST = "Хотите прикрепить еще пост?"
+CHOOSE_CHAPTER = "Хотите прикрепить еще пост?"
+
 BUTTON_MENU1 = 'Добавить / Изменить теорию'
 BUTTON_MENU2 = 'Отправить рассылку'
 BUTTON_CONFIRM = 'Подтвердить'
-BUTTON_NOT_CONFIRM = 'Отмена'
+BUTTON_NOT_CONFIRM = '⬅ Назад'
 BUTTON_BACK = '⬅ Назад'
 BUTTON_SKIP = "Пропустить"
+BUTTON_END_POST = "Перейти к выбору главы"
+BUTTON_NEXT_POST = "Прикрепить ещё один пост"

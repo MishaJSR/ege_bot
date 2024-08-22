@@ -77,7 +77,7 @@ async def user_start(message: types.Message, state: FSMContext):
             user_id=message.from_user.id,
             username=message.from_user.full_name,
         )
-        await message.answer(f"Привет {username}")
+        await message.answer(f"Привет {message.from_user.full_name}")
     await message.answer(GREETING, reply_markup=start_user_kb())
     await state.set_state(UserState.start)
 

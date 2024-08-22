@@ -1,4 +1,5 @@
 from aiogram import types, Router, F
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 import validators
 
@@ -8,8 +9,20 @@ from handlers.admin.state import AdminState
 from keyboards.admin.inline_admin import make_markup_kb
 from keyboards.admin.reply_admin import *
 from keyboards.user.reply_user import back_kb
+from utils.common.static_user import BACK_BUTTON
 
 admin_spam_router = Router()
+
+
+@admin_spam_router.message(StateFilter(AdminSpamState), F.text == BACK_BUTTON or F.text == BUTTON_NOT_CONFIRM)
+async def back_step_handler(message: types.Message, state: FSMContext) -> None:
+    AdminSpamState.photo = None
+    AdminSpamState.text = None
+    AdminSpamState.button_text = None
+    AdminSpamState.button_link = None
+    AdminSpamState.markup = None
+    await message.answer(RETURN_IN_MAIN_ADMIN, reply_markup=start_kb())
+    await state.set_state(AdminState.start)
 
 
 @admin_spam_router.message(AdminState.start, F.text == start_kb_menu[1])
@@ -62,12 +75,16 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 @admin_spam_router.message(AdminSpamState.show_post, F.text == BUTTON_CONFIRM)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())
     await send_spam(message, AdminSpamState)
     await state.set_state(AdminState.start)
 
 
 @admin_spam_router.message(AdminSpamState.show_post, F.text == BUTTON_NOT_CONFIRM)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    await message.answer(RETURN_BACK, reply_markup=start_kb())
+    AdminSpamState.photo = None
+    AdminSpamState.text = None
+    AdminSpamState.button_text = None
+    AdminSpamState.button_link = None
+    AdminSpamState.markup = None
+    await message.answer(RETURN_IN_MAIN_ADMIN, reply_markup=start_kb())
     await state.set_state(AdminState.start)

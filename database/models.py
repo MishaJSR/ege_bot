@@ -30,9 +30,21 @@ class Task(Base):
     priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
+class Theory(Base):
+    __tablename__ = 'theory'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    under_chapter: Mapped[str] = mapped_column(Text, nullable=False)
+    photo_id: Mapped[str] = mapped_column(Text, nullable=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 class UserRepository(SQLAlchemyRepository):
     model = User
 
 
 class TaskRepository(SQLAlchemyRepository):
     model = Task
+
+
+class TheoryRepository(SQLAlchemyRepository):
+    model = Theory

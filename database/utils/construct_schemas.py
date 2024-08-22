@@ -18,3 +18,9 @@ class ConstructTask(BaseModel):
     answer: str
     about: Optional[str] = None
     addition: Optional[str] = None
+
+
+class ConstructTheory(BaseModel):
+    under_chapter: str
+    photo_id: Optional[str] = None
+    text: str

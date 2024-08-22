@@ -21,6 +21,14 @@ def confirm_kb():
     return test_kb.as_markup(resize_keyboard=True)
 
 
+def next_post_kb():
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text=BUTTON_END_POST)
+    test_kb.button(text=BUTTON_NEXT_POST)
+    test_kb.adjust(1, 1)
+    return test_kb.as_markup(resize_keyboard=True)
+
+
 def skip_kb():
     test_kb = ReplyKeyboardBuilder()
     test_kb.button(text=BUTTON_BACK)
@@ -34,5 +42,3 @@ def back_kb():
     test_kb.button(text=BUTTON_BACK)
     test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
-
-
