@@ -13,24 +13,6 @@ from utils.common.static_user import *
 user_private_router = Router()
 
 
-#
-# @user_private_router.my_chat_member(ChatMemberUpdatedFilter(member_status_changed=KICKED))
-# async def user_blocked_bot(event: ChatMemberUpdated):
-#     data = {
-#         "user_id": 548349299
-#     }
-#     res = await UserRepository().update_fields(data=data)
-#
-
-@user_private_router.message(Command("test"))
-async def user_blocked_bot(message: types.Message, state: FSMContext):
-    data = {
-        "user_id": 548349299
-    }
-    res = await UserRepository().u(data=data)
-    print(res)
-
-
 @user_private_router.message(StateFilter(UserState), F.text == BACK_BUTTON)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
@@ -138,8 +120,9 @@ async def user_press_answer_mode(message: types.Message, state: FSMContext):
         await message.answer(DONT_UNDERSTAND)
         return
     if message.text == answer_mode_list[0]:
-        await message.answer(DONT_UNDERSTAND)
-        return
+        await send_theory(message, UserState)
+        await message.answer(END_THEORY, reply_markup=answer_mode_kb())
+        await state.set_state(UserState.answer_mode)
     else:
         UserState.questions = await get_questions(under_chapter=UserState.select_under_chapter)
         await message.answer(TEXT_INTRODUCE_TEST, reply_markup=ready_test_kb())

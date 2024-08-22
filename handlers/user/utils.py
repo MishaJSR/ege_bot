@@ -5,7 +5,7 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
-from database.models import UserRepository, TaskRepository
+from database.models import UserRepository, TaskRepository, TheoryRepository
 from database.utils.AlchemyDataObject import AlchemyDataObject
 from database.utils.construct_schemas import ConstructUser
 from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb
@@ -99,3 +99,16 @@ async def update_under_chapters(message: types.Message, user_state):
 
 def split_array(arr, chunk_size):
     return [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]
+
+
+async def send_theory(message: types.Message, user_state):
+    theory_field = ["text", "photo_id"]
+    theory_filter = {
+        "under_chapter": user_state.select_under_chapter
+    }
+    posts = await TheoryRepository().get_all_by_fields(data=theory_field, field_filter=theory_filter)
+    for post in posts:
+        if post.photo_id:
+            await message.answer_photo(photo=post.photo_id, caption=post.text)
+        else:
+            await message.answer(post.text)

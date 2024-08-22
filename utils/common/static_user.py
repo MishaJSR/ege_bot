@@ -8,6 +8,8 @@ TEXT_ANSWER_MODE = "Выберите способ подготовки"
 TEXT_INTRODUCE_TEST = "Инструкция к тесту"
 TEXT_START_TEST = "Начало теста"
 
+END_THEORY = "На этом теория закончилась"
+
 DONT_UNDERSTAND = "Я не понимаю тебя"
 EMPTY_UNDER_CHAPTERS = "Больше нет"
 

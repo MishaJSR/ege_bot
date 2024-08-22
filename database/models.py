@@ -36,6 +36,7 @@ class Theory(Base):
     under_chapter: Mapped[str] = mapped_column(Text, nullable=False)
     photo_id: Mapped[str] = mapped_column(Text, nullable=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
+    message_id: Mapped[int] = mapped_column(Integer, nullable=True)
 
 
 class UserRepository(SQLAlchemyRepository):

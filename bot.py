@@ -13,6 +13,7 @@ from handlers.admin.admin_main_router import admin_private_router
 from utils.common.bot_cmd_list import private
 from middlewares.db import DataBaseSession
 from database.engine import async_session_maker
+from utils.spam_def.spam_send import send_remind
 
 
 def get_storage(config):
@@ -55,6 +56,7 @@ async def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     dp.update.middleware(DataBaseSession(session_pool=async_session_maker))
+    #asyncio.create_task(send_remind(bot))
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands=private, scope=BotCommandScopeAllPrivateChats())
     await dp.start_polling(bot)

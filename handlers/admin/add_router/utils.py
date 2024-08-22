@@ -5,16 +5,23 @@ from aiogram import types
 from database.models import UserRepository, TheoryRepository
 from database.utils.construct_schemas import ConstructUser, ConstructTheory
 from keyboards.admin.reply_admin import start_kb
+from utils.common.static_url import image_chat_id
 
 
 async def set_theory_multi(message: types.Message, admin_add_state):
     try:
         for post in admin_add_state.posts_list:
             photo_id, text = post
+            message_id = None
+            if photo_id:
+                res = await message.bot.send_photo(chat_id=image_chat_id, photo=photo_id)
+                message_id = res.message_id
             new_theory = ConstructTheory(under_chapter=admin_add_state.under_chapter,
                                          photo_id=photo_id,
-                                         text=text).model_dump()
+                                         text=text,
+                                         message_id=message_id).model_dump()
             await TheoryRepository().add_object(data=new_theory)
+
         admin_add_state.text = None
         admin_add_state.photo = None
         admin_add_state.chapter = None

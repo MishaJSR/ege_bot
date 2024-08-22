@@ -24,3 +24,4 @@ class ConstructTheory(BaseModel):
     under_chapter: str
     photo_id: Optional[str] = None
     text: str
+    message_id: Optional[int] = None
