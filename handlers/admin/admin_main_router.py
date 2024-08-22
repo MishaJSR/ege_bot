@@ -4,8 +4,6 @@ from aiogram.filters import Command
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
 
-from database.models import UserRepository, TaskRepository
-from database.utils.construct_schemas import ConstructUser, ConstructTask
 from filters.admin_filter import AdminFilter
 from handlers.admin.add_router.admin_add_router import admin_add_router
 from handlers.admin.spam_router.admin_spam_router import admin_spam_router

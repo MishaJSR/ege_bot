@@ -14,7 +14,7 @@ from utils.common.static_user import BACK_BUTTON
 admin_spam_router = Router()
 
 
-@admin_spam_router.message(StateFilter(AdminSpamState), F.text == BACK_BUTTON or F.text == BUTTON_NOT_CONFIRM)
+@admin_spam_router.message(StateFilter(AdminSpamState), F.text == BACK_BUTTON)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     AdminSpamState.photo = None
     AdminSpamState.text = None
