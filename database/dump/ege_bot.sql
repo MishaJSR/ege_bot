@@ -75,6 +75,44 @@ ALTER SEQUENCE public.task_id_seq OWNED BY public.task.id;
 
 
 --
+-- Name: theory; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.theory (
+    id integer NOT NULL,
+    under_chapter text NOT NULL,
+    photo_id text,
+    text text NOT NULL,
+    updated timestamp without time zone NOT NULL,
+    message_id integer
+);
+
+
+ALTER TABLE public.theory OWNER TO postgres;
+
+--
+-- Name: theory_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.theory_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.theory_id_seq OWNER TO postgres;
+
+--
+-- Name: theory_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.theory_id_seq OWNED BY public.theory.id;
+
+
+--
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -119,6 +157,13 @@ ALTER TABLE ONLY public.task ALTER COLUMN id SET DEFAULT nextval('public.task_id
 
 
 --
+-- Name: theory id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.theory ALTER COLUMN id SET DEFAULT nextval('public.theory_id_seq'::regclass);
+
+
+--
 -- Name: user id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -130,7 +175,7 @@ ALTER TABLE ONLY public."user" ALTER COLUMN id SET DEFAULT nextval('public.user_
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-c2013415c245
+04423873637c
 \.
 
 
@@ -1630,12 +1675,18 @@ COPY public.task (id, chapter, under_chapter, description, answer_mode, answers,
 
 
 --
+-- Data for Name: theory; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.theory (id, under_chapter, photo_id, text, updated, message_id) FROM stdin;
+\.
+
+
+--
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public."user" (id, user_id, username, is_subscribe, updated) FROM stdin;
-7	548349299	Михаил	f	2024-08-08 11:37:08.868531
-8	1219986749	Anastasia	f	2024-08-08 16:02:43.794407
 \.
 
 
@@ -1647,10 +1698,17 @@ SELECT pg_catalog.setval('public.task_id_seq', 3633, true);
 
 
 --
+-- Name: theory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.theory_id_seq', 13, true);
+
+
+--
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_id_seq', 8, true);
+SELECT pg_catalog.setval('public.user_id_seq', 10, true);
 
 
 --
@@ -1667,6 +1725,14 @@ ALTER TABLE ONLY public.alembic_version
 
 ALTER TABLE ONLY public.task
     ADD CONSTRAINT task_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: theory theory_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.theory
+    ADD CONSTRAINT theory_pkey PRIMARY KEY (id);
 
 
 --
