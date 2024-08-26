@@ -1687,6 +1687,7 @@ COPY public.theory (id, under_chapter, photo_id, text, updated, message_id) FROM
 --
 
 COPY public."user" (id, user_id, username, is_subscribe, updated) FROM stdin;
+11	548349299	Михаил	t	2024-08-26 10:59:41.050128
 \.
 
 
@@ -1701,14 +1702,14 @@ SELECT pg_catalog.setval('public.task_id_seq', 3633, true);
 -- Name: theory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.theory_id_seq', 13, true);
+SELECT pg_catalog.setval('public.theory_id_seq', 18, true);
 
 
 --
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_id_seq', 10, true);
+SELECT pg_catalog.setval('public.user_id_seq', 11, true);
 
 
 --
