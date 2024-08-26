@@ -27,15 +27,13 @@ async def set_theory_multi(message: types.Message, admin_add_state):
         admin_add_state.chapter = None
         admin_add_state.under_chapter = None
         admin_add_state.posts_list = []
-        await message.answer("Теория добавлена")
+        await message.answer("Теория добавлена", reply_markup=start_kb())
     except Exception as e:
         logging.info(f"Ошибка создания теории {e}")
-        await message.answer("Ошибка создания теории")
+        await message.answer("Ошибка создания теории", reply_markup=start_kb())
 
 
 async def send_demo_add_post(message: types.Message, admin_spam_state):
     if admin_spam_state.photo:
-        await message.answer_photo(photo=admin_spam_state.photo,
-                                   caption=admin_spam_state.text)
-    else:
-        await message.answer(text=admin_spam_state.text)
+        await message.answer_photo(photo=admin_spam_state.photo)
+    await message.answer(text=admin_spam_state.text, parse_mode="Markdown")

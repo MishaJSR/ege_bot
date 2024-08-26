@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from utils.common.static_admin import *
 
-start_kb_menu = [BUTTON_MENU1, BUTTON_MENU2]
+start_kb_menu = [BUTTON_MENU1, BUTTON_MENU2, BUTTON_MENU3]
 
 
 def start_kb():

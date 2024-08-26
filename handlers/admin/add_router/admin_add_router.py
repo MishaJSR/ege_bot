@@ -24,6 +24,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
         AdminAddState.chapter = None
         AdminAddState.under_chapter = None
         AdminAddState.posts_list = []
+        await state.set_state(AdminState.start)
         await message.answer("Вы вернулись в главное меню", reply_markup=start_kb())
 
     if current_state == AdminAddState.send_text:
@@ -73,7 +74,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 @admin_add_router.message(AdminAddState.send_text, F.text)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    AdminAddState.text = message.text
+    AdminAddState.text = message.md_text.replace("\\", "")
     await send_demo_add_post(message=message, admin_spam_state=AdminAddState)
     await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())
     await state.set_state(AdminAddState.confirm_post)
@@ -114,9 +115,10 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 
 @admin_add_router.message(AdminAddState.confirm_under_chapter, F.text == BUTTON_CONFIRM)
-async def admin_spam_set_text(message: types.Message):
+async def admin_spam_set_text(message: types.Message, state: FSMContext):
     AdminAddState.posts_list.append([AdminAddState.photo, AdminAddState.text])
     await set_theory_multi(message, AdminAddState)
+    await state.set_state(AdminState.start)
 
 
 @admin_add_router.message(AdminAddState.select_post_action, F.text == BUTTON_NEXT_POST)

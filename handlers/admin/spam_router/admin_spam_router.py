@@ -25,7 +25,7 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     await state.set_state(AdminState.start)
 
 
-@admin_spam_router.message(AdminState.start, F.text == start_kb_menu[1])
+@admin_spam_router.message(AdminState.start, F.text == start_kb_menu[2])
 async def admin_spam_photo_send(message: types.Message, state: FSMContext):
     await message.answer(SEND_PHOTO, reply_markup=skip_kb())
     await state.set_state(AdminSpamState.send_photo)
@@ -44,7 +44,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 @admin_spam_router.message(AdminSpamState.send_text, F.text)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    AdminSpamState.text = message.text
+    AdminSpamState.text = message.md_text
     await message.answer(SEND_BUTTON_TEXT, reply_markup=skip_kb())
     await state.set_state(AdminSpamState.send_button_text)
 
@@ -66,7 +66,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
     if not validators.url(message.text):
         await message.answer(DONT_UNDERSTAND_TRY_AGAIN)
         return
-    AdminSpamState.button_link = message.text
+    AdminSpamState.button_link = message.md_text
     AdminSpamState.markup = make_markup_kb(text=AdminSpamState.text, url=AdminSpamState.button_link)
     await send_demo(message=message, admin_spam_state=AdminSpamState)
     await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())

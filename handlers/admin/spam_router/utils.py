@@ -8,12 +8,14 @@ from keyboards.admin.reply_admin import start_kb
 
 
 async def send_demo(message: types.Message, admin_spam_state):
+    admin_spam_state.text = admin_spam_state.text.replace("\\", "")
     if admin_spam_state.photo:
         await message.answer_photo(photo=admin_spam_state.photo,
                                    caption=admin_spam_state.text,
-                                   reply_markup=admin_spam_state.markup)
+                                   reply_markup=admin_spam_state.markup,
+                                   parse_mode="Markdown")
     else:
-        await message.answer(text=admin_spam_state.text, reply_markup=admin_spam_state.markup)
+        await message.answer(text=admin_spam_state.text, reply_markup=admin_spam_state.markup, parse_mode="Markdown")
 
 
 async def send_spam(message: types.Message, admin_spam_state):
@@ -26,7 +28,9 @@ async def send_spam(message: types.Message, admin_spam_state):
                 await message.bot.send_photo(chat_id=user.user_id,
                                              photo=admin_spam_state.photo,
                                              caption=admin_spam_state.text,
-                                             reply_markup=admin_spam_state.markup)
+                                             reply_markup=admin_spam_state.markup,
+                                             parse_mode="Markdown")
+                counter += 1
 
             except Exception as e:
                 logging.info("Cant send user spam")
@@ -35,7 +39,8 @@ async def send_spam(message: types.Message, admin_spam_state):
             try:
                 await message.bot.send_message(chat_id=user.user_id,
                                                text=admin_spam_state.text,
-                                               reply_markup=admin_spam_state.markup)
+                                               reply_markup=admin_spam_state.markup,
+                                               parse_mode="Markdown")
                 counter += 1
             except Exception as e:
                 logging.info("Cant send user spam")

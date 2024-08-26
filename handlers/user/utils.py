@@ -109,6 +109,5 @@ async def send_theory(message: types.Message, user_state):
     posts = await TheoryRepository().get_all_by_fields(data=theory_field, field_filter=theory_filter)
     for post in posts:
         if post.photo_id:
-            await message.answer_photo(photo=post.photo_id, caption=post.text)
-        else:
-            await message.answer(post.text)
+            await message.answer_photo(photo=post.photo_id)
+        await message.answer(post.text, parse_mode="Markdown")

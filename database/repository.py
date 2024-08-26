@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, delete, and_
 
 from database.utils.AlchemyDataObject import AlchemyDataObject
 from database.utils.decorators import async_session_maker_decorator_select
@@ -11,6 +11,7 @@ class AbstractRepository(ABC):
     @abstractmethod
     async def add_object(self, **kwargs) -> int:
         raise NotImplementedError
+
     @abstractmethod
     async def get_one_by_fields(self, **kwargs) -> AlchemyDataObject:
         raise NotImplementedError
@@ -19,9 +20,9 @@ class AbstractRepository(ABC):
     async def get_all_by_fields(self, **kwargs) -> list[AlchemyDataObject]:
         raise NotImplementedError
 
-    # @abstractmethod
-    # async def update_fields(self, **kwargs) -> list[AlchemyDataObject]:
-    #     raise NotImplementedError
+    @abstractmethod
+    async def delete_fields(self, **kwargs) -> list[AlchemyDataObject]:
+        raise NotImplementedError
 
 
 class SQLAlchemyRepository(AbstractRepository):
@@ -44,15 +45,10 @@ class SQLAlchemyRepository(AbstractRepository):
         res_values = [el._data for el in kwargs.get("result_query").fetchall()]
         return [AlchemyDataObject(kwargs.get("data"), value) for value in res_values]
 
-    # async def update_one_field(self, **kwargs) -> AlchemyDataObject:
-    #     try:
-    #         data = kwargs.get("data")
-    #         values = kwargs.get("values")
-    #         async with async_session_maker() as session:
-    #             query = update(self.model).where(self.model.user_id == 548349299).values(user_id=1)
-    #             await session.execute(query)
-    #             await session.commit()
-    #         return True
-    #     except Exception as e:
-    #         print(e)
-    #         return False
+    async def delete_fields(self, **kwargs) -> list[AlchemyDataObject]:
+        conditions = [getattr(self.model, key) == value for key, value in kwargs.get("delete_filter").items()]
+        async with async_session_maker() as session:
+            stmt = delete(self.model).where(and_(*conditions)).returning(self.model.id)
+            await session.execute(stmt)
+            await session.commit()
+

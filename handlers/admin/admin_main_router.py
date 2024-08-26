@@ -6,13 +6,14 @@ from aiogram.fsm.context import FSMContext
 
 from filters.admin_filter import AdminFilter
 from handlers.admin.add_router.admin_add_router import admin_add_router
+from handlers.admin.delete_router.admin_delete_router import admin_delete_router
 from handlers.admin.spam_router.admin_spam_router import admin_spam_router
 from handlers.admin.state import AdminState
 from keyboards.admin.reply_admin import start_kb
 from utils.common.static_admin import *
 
 admin_private_router = Router()
-admin_private_router.include_routers(admin_add_router, admin_spam_router)
+admin_private_router.include_routers(admin_add_router, admin_spam_router, admin_delete_router)
 admin_private_router.message.filter(AdminFilter())
 
 
