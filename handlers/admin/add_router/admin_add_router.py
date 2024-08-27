@@ -74,7 +74,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 @admin_add_router.message(AdminAddState.send_text, F.text)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    AdminAddState.text = message.md_text.replace("\\", "")
+    AdminAddState.text = message.html_text
     await send_demo_add_post(message=message, admin_spam_state=AdminAddState)
     await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())
     await state.set_state(AdminAddState.confirm_post)

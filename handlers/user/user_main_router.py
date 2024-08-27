@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter, ChatMemberUpdatedFilter, KICKED, Command
@@ -143,10 +144,10 @@ async def user_first_test(message: types.Message):
         await message.answer(SHORT_INTRODUCE_TEST)
         return
     if sorted(list(message.text)) == sorted(list(UserState.now_question.answer)):
-        await message.answer(SUCCESS_TEST, reply_markup=next_kb(), parse_mode="Markdown")
+        await message.answer(SUCCESS_TEST, reply_markup=next_kb(), parse_mode=ParseMode.HTML)
     else:
         text_to_send = f"{NOT_SUCCESS_TEST}{UserState.now_question.answer}\n\n"
-        await message.answer(text_to_send, reply_markup=next_kb(), parse_mode="Markdown")
+        await message.answer(text_to_send, reply_markup=next_kb(), parse_mode=ParseMode.HTML)
     if UserState.now_question.about:
         mess = await message.answer(SHOW_ABOUT_TEXT, reply_markup=get_inline_about())
         UserState.last_message_id = mess.message_id
@@ -165,4 +166,15 @@ async def check_button(call: types.CallbackQuery):
     await call.message.delete()
     UserState.last_message_id = None
     await call.answer("Пояснение")
-    await call.message.answer(f"{ABOUT_TEST}{UserState.now_question.about}", parse_mode="Markdown")
+    about = UserState.now_question.about
+    try:
+        if UserState.now_question.about[:2] == "1.":
+            result = re.split(r'\s*\d+\.\s*', UserState.now_question.about.strip())[1:]
+            for index, line in enumerate(result):
+                result[index] = f"{index+1}. {line}"
+            about = "\n".join(result)
+    except Exception as e:
+        logging.info(e)
+        logging.info(f"Error in about {UserState.now_question.about}")
+        about = UserState.now_question.about
+    await call.message.answer(f"{ABOUT_TEST}{about}", parse_mode=ParseMode.HTML)

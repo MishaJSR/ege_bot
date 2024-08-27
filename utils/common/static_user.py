@@ -14,9 +14,9 @@ DONT_UNDERSTAND = "Я не понимаю тебя"
 EMPTY_UNDER_CHAPTERS = "Больше нет"
 
 SHORT_INTRODUCE_TEST = "Нужно ввести 123"
-SUCCESS_TEST = "*Правильно*\n\nПродолжим?"
-NOT_SUCCESS_TEST = "*Неправильно*\n*Правильный ответ:* "
-ABOUT_TEST = "*Пояснение*:\n\n"
+SUCCESS_TEST = "<b>Правильно</b>\n\nПродолжим?"
+NOT_SUCCESS_TEST = "<b>Неправильно</b>\n<b>Правильный ответ:</b> "
+ABOUT_TEST = "<b>Пояснение</b>:\n\n"
 END_TEST = "Задания закончились"
 NEXT_CHAPTER = "Переход далее"
 

@@ -1,6 +1,7 @@
 from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
+from aiogram.enums.parse_mode import ParseMode
 import validators
 
 from handlers.admin.spam_router.state import AdminSpamState
@@ -44,7 +45,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
 
 @admin_spam_router.message(AdminSpamState.send_text, F.text)
 async def admin_spam_set_text(message: types.Message, state: FSMContext):
-    AdminSpamState.text = message.md_text
+    AdminSpamState.text = message.html_text
     await message.answer(SEND_BUTTON_TEXT, reply_markup=skip_kb())
     await state.set_state(AdminSpamState.send_button_text)
 
@@ -66,7 +67,7 @@ async def admin_spam_set_text(message: types.Message, state: FSMContext):
     if not validators.url(message.text):
         await message.answer(DONT_UNDERSTAND_TRY_AGAIN)
         return
-    AdminSpamState.button_link = message.md_text
+    AdminSpamState.button_link = message.text
     AdminSpamState.markup = make_markup_kb(text=AdminSpamState.text, url=AdminSpamState.button_link)
     await send_demo(message=message, admin_spam_state=AdminSpamState)
     await message.answer(CONFIRM_TEXT, reply_markup=confirm_kb())

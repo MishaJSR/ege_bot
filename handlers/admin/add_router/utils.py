@@ -1,6 +1,7 @@
 import logging
 
 from aiogram import types
+from aiogram.enums import ParseMode
 
 from database.models import UserRepository, TheoryRepository
 from database.utils.construct_schemas import ConstructUser, ConstructTheory
@@ -36,4 +37,4 @@ async def set_theory_multi(message: types.Message, admin_add_state):
 async def send_demo_add_post(message: types.Message, admin_spam_state):
     if admin_spam_state.photo:
         await message.answer_photo(photo=admin_spam_state.photo)
-    await message.answer(text=admin_spam_state.text, parse_mode="Markdown")
+    await message.answer(text=admin_spam_state.text, parse_mode=ParseMode.HTML)

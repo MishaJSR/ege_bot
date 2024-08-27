@@ -56,7 +56,7 @@ async def main():
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
     dp.update.middleware(DataBaseSession(session_pool=async_session_maker))
-    #asyncio.create_task(send_remind(bot))
+    asyncio.create_task(send_remind(bot))
     await bot.delete_webhook(drop_pending_updates=True)
     await bot.set_my_commands(commands=private, scope=BotCommandScopeAllPrivateChats())
     await dp.start_polling(bot)

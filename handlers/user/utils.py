@@ -2,6 +2,7 @@ import logging
 import random
 
 from aiogram import types
+from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
@@ -16,9 +17,9 @@ async def send_question(message: types.Message, user_state, state: FSMContext) -
     if user_state.questions:
         user_state.now_question = random.choice(user_state.questions)
         user_state.questions.remove(user_state.now_question)
-        res_message = f"*{user_state.now_question.description}*\n\n" \
+        res_message = f"<b>{user_state.now_question.description}</b>\n\n" \
                       f"{user_state.now_question.answers}\n"
-        await message.answer(res_message, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove())
+        await message.answer(res_message, parse_mode=ParseMode.HTML, reply_markup=ReplyKeyboardRemove())
     else:
         await message.answer("Задания закончились", reply_markup=answer_mode_kb())
         await state.set_state(user_state.answer_mode)
@@ -110,4 +111,4 @@ async def send_theory(message: types.Message, user_state):
     for post in posts:
         if post.photo_id:
             await message.answer_photo(photo=post.photo_id)
-        await message.answer(post.text, parse_mode="Markdown")
+        await message.answer(post.text, parse_mode=ParseMode.HTML)
