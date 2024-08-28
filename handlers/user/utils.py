@@ -1,15 +1,18 @@
 import logging
+import os
 import random
 
 from aiogram import types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
-from aiogram.types import ReplyKeyboardRemove
+from aiogram.types import ReplyKeyboardRemove, FSInputFile
 
 from database.models import UserRepository, TaskRepository, TheoryRepository, UserProgressRepository
 from database.utils.AlchemyDataObject import AlchemyDataObject
 from database.utils.construct_schemas import ConstructUser, ConstructUserProgress
-from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb
+from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb, start_profile_kb
+from utils.common.levels import levels, levels_arr
+from utils.common.static_url import path_to_imgs, imgs_format
 from utils.common.static_user import *
 
 
@@ -137,3 +140,78 @@ async def send_theory(message: types.Message, user_state):
         if post.photo_id:
             await message.answer_photo(photo=post.photo_id)
         await message.answer(post.text, parse_mode=ParseMode.HTML)
+
+
+async def count_statistic(message: types.Message, flag="all", chapter=None, under_chapter=None):
+    match flag:
+        case "chapter":
+            field_filter_ready = {
+                "chapter": chapter,
+                "user_id": message.from_user.id,
+                "is_pass": True
+            }
+            field_filter_user = {
+                "chapter": chapter,
+                "user_id": message.from_user.id
+            }
+            field_filter_all = {
+                "chapter": chapter,
+            }
+        case "under_chapter":
+            field_filter_ready = {
+                "under_chapter": under_chapter,
+                "user_id": message.from_user.id,
+                "is_pass": True
+            }
+            field_filter_user = {
+                "under_chapter": under_chapter,
+                "user_id": message.from_user.id
+            }
+            field_filter_all = {
+                "under_chapter": under_chapter
+            }
+        case _:
+            field_filter_ready = {
+                "user_id": message.from_user.id,
+                "is_pass": True
+            }
+            field_filter_user = {
+                "user_id": message.from_user.id
+            }
+            field_filter_all = None
+
+
+    data = ["id"]
+    all_tasks = await TaskRepository().get_all_by_fields(data=data, field_filter=field_filter_all)
+    all_user_tasks = await UserProgressRepository().get_all_by_fields(data=data, field_filter=field_filter_user)
+    all_user_ready_tasks = await UserProgressRepository().get_all_by_fields(data=data, field_filter=field_filter_ready)
+    percent = round(len(all_user_tasks) / len(all_tasks) * 100, 2)
+    if len(all_user_tasks) == 0:
+        percent_ready = 0
+    else:
+        percent_ready = round(len(all_user_ready_tasks) / len(all_user_tasks) * 100, 2)
+    status = closest_number(levels, int(percent * percent_ready))
+    return percent, len(all_user_tasks), len(all_tasks), percent_ready, status
+
+
+async def send_status(message: types.Message, status):
+    name = os.getcwd() + path_to_imgs + f"\\{status}.{imgs_format}"
+    file = FSInputFile(name)
+    await message.answer_photo(photo=file, caption=f"<b>Вы достигли {levels_arr.index(status) + 1} уровня -"
+                                                   f" {status}</b>",
+                               parse_mode=ParseMode.HTML)
+
+
+async def print_statistic(message: types.Message, percent, all_user_tasks, all_tasks, percent_ready, addition=""):
+    text = f"{addition}{TEXT_COMMON_STATISTIC_1} <b>{str(percent)} %</b>\n" \
+           f"{TEXT_COMMON_STATISTIC_2}: <b>{all_user_tasks} из {all_tasks}</b>\n" \
+           f"{TEXT_COMMON_STATISTIC_3}: <b>{str(percent_ready)} %</b>"
+    await message.answer(text, reply_markup=start_profile_kb(), parse_mode=ParseMode.HTML)
+
+
+def closest_number(dictionary: dict, target) -> str:
+    closest = 0
+    for key, value in dictionary.items():
+        if abs(key - target) < abs(closest - target):
+            closest = key
+    return dictionary.get(closest)

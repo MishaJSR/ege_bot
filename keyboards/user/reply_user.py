@@ -4,15 +4,24 @@ import emoji
 
 from utils.common.static_user import *
 
-start_but = ['Начать подготовку']
-# main_but = ['Основная часть', 'Планы', 'Признаки', '23 задание', '25 задание']
-main_but = ['Основная часть']
+start_but = [BUTTON_START_PREPARE_1, BUTTON_START_PREPARE_2]
+start_profile = [BUTTON_MORE_STATISTIC, BUTTON_ABOUT_LEVEL]
+main_but = [BUTTON_MAIN_CHAPTER]
 answer_mode_list = ['Теория', 'Практика']
 
 
 def start_user_kb(data=None):
     test_kb = ReplyKeyboardBuilder()
     for el in start_but:
+        test_kb.button(text=el)
+    test_kb.adjust(1, 1)
+    return test_kb.as_markup(resize_keyboard=True)
+
+
+def start_profile_kb(data=None):
+    test_kb = ReplyKeyboardBuilder()
+    test_kb.button(text=BACK_BUTTON)
+    for el in start_profile:
         test_kb.button(text=el)
     test_kb.adjust(1, 1)
     return test_kb.as_markup(resize_keyboard=True)
@@ -72,6 +81,7 @@ def next_kb(data=None):
     test_kb.button(text=BACK_BUTTON)
     test_kb.button(text=NEXT_BUTTON)
     return test_kb.as_markup(resize_keyboard=True)
+
 
 def back_kb(data=None):
     test_kb = ReplyKeyboardBuilder()

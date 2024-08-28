@@ -8,7 +8,7 @@ from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
 import betterlogging as bl
 
 from env_config import load_config
-from handlers.user.user_main_router import user_private_router
+from handlers.user.user_main_router import user_main_router
 from handlers.admin.admin_main_router import admin_private_router
 from utils.common.bot_cmd_list import private
 from middlewares.db import DataBaseSession
@@ -51,7 +51,7 @@ async def main():
 
     bot = Bot(token=config.tg_bot.token)
     dp = Dispatcher(storage=storage)
-    dp.include_routers(admin_private_router, user_private_router)
+    dp.include_routers(admin_private_router, user_main_router)
 
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
