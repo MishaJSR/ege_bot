@@ -102,6 +102,6 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
                           addition=f"Статистика по теме: <b>{UserProfileState.select_under_chapter}</b>\n\n")
 
 
-@user_profile_router.message(UserProfileState.start, F.text == BUTTON_ABOUT_LEVEL)
+@user_profile_router.message(StateFilter("*"), F.text == BUTTON_ABOUT_LEVEL)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     await message.answer(TEXT_LEVEL)

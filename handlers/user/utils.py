@@ -199,6 +199,7 @@ async def send_status(message: types.Message, status):
     file = FSInputFile(name)
     await message.answer_photo(photo=file, caption=f"<b>Вы достигли {levels_arr.index(status) + 1} уровня -"
                                                    f" {status}</b>",
+                               reply_markup=start_profile_kb(),
                                parse_mode=ParseMode.HTML)
 
 
@@ -206,7 +207,7 @@ async def print_statistic(message: types.Message, percent, all_user_tasks, all_t
     text = f"{addition}{TEXT_COMMON_STATISTIC_1} <b>{str(percent)} %</b>\n" \
            f"{TEXT_COMMON_STATISTIC_2}: <b>{all_user_tasks} из {all_tasks}</b>\n" \
            f"{TEXT_COMMON_STATISTIC_3}: <b>{str(percent_ready)} %</b>"
-    await message.answer(text, reply_markup=start_profile_kb(), parse_mode=ParseMode.HTML)
+    await message.answer(text, parse_mode=ParseMode.HTML)
 
 
 def closest_number(dictionary: dict, target) -> str:
