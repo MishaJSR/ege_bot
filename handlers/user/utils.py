@@ -195,7 +195,7 @@ async def count_statistic(message: types.Message, flag="all", chapter=None, unde
 
 
 async def send_status(message: types.Message, status):
-    name = os.getcwd() + path_to_imgs + f"\\{status}.{imgs_format}"
+    name = os.getcwd() + path_to_imgs + f"{status}.{imgs_format}"
     file = FSInputFile(name)
     await message.answer_photo(photo=file, caption=f"<b>Вы достигли {levels_arr.index(status) + 1} уровня -"
                                                    f" {status}</b>",
