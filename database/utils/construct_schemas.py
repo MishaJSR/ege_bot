@@ -25,3 +25,11 @@ class ConstructTheory(BaseModel):
     photo_id: Optional[str] = None
     text: str
     message_id: Optional[int] = None
+
+
+class ConstructUserProgress(BaseModel):
+    chapter: str
+    under_chapter: str
+    user_id: Optional[int]
+    question_id: Optional[int]
+    is_pass: bool

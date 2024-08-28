@@ -5,6 +5,8 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart, StateFilter, ChatMemberUpdatedFilter, KICKED, Command
 from aiogram.types import ChatMemberUpdated
 
+from database.models import UserProgressRepository
+from database.utils.construct_schemas import ConstructUserProgress
 from handlers.user.state import UserState
 from handlers.user.utils import *
 from keyboards.user.inline_user import get_inline_channel, get_inline_about
@@ -144,8 +146,10 @@ async def user_first_test(message: types.Message):
         await message.answer(SHORT_INTRODUCE_TEST)
         return
     if sorted(list(message.text)) == sorted(list(UserState.now_question.answer)):
+        await update_progress(status=True, message=message, now_question=UserState.now_question)
         await message.answer(SUCCESS_TEST, reply_markup=next_kb(), parse_mode=ParseMode.HTML)
     else:
+        await update_progress(status=False, message=message, now_question=UserState.now_question)
         text_to_send = f"{NOT_SUCCESS_TEST}{UserState.now_question.answer}\n\n"
         await message.answer(text_to_send, reply_markup=next_kb(), parse_mode=ParseMode.HTML)
     if UserState.now_question.about:

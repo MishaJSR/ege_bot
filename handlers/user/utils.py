@@ -6,9 +6,9 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
 
-from database.models import UserRepository, TaskRepository, TheoryRepository
+from database.models import UserRepository, TaskRepository, TheoryRepository, UserProgressRepository
 from database.utils.AlchemyDataObject import AlchemyDataObject
-from database.utils.construct_schemas import ConstructUser
+from database.utils.construct_schemas import ConstructUser, ConstructUserProgress
 from keyboards.user.reply_user import answer_mode_kb, under_chapter_kb
 from utils.common.static_user import *
 
@@ -62,10 +62,35 @@ async def get_all_under_chapters(chapter) -> list[str]:
 
 
 async def get_questions(under_chapter) -> AlchemyDataObject:
-    task_fields = ["description", "answers", "answer", "about"]
+    task_fields = ["id", "chapter", "under_chapter", "description", "answers", "answer", "about"]
     task_filter = {"under_chapter": under_chapter}
     rows = await TaskRepository().get_all_by_fields(data=task_fields, field_filter=task_filter)
     return rows
+
+
+async def update_progress(status, message, now_question):
+    update_filter = {
+        "chapter": now_question.chapter,
+        "under_chapter": now_question.under_chapter,
+        "user_id": message.from_user.id,
+        "question_id": now_question.id,
+        "is_pass": False
+    }
+    update_data = {
+        "is_pass": status
+    }
+    check_filter = {
+        "question_id": now_question.id
+    }
+    is_already_add = await UserProgressRepository().get_one_by_fields(data=["id"], field_filter=check_filter)
+    await UserProgressRepository().update_fields(update_data=update_data, update_filter=update_filter)
+    if not is_already_add:
+        new_progress = ConstructUserProgress(chapter=now_question.chapter,
+                                             under_chapter=now_question.under_chapter,
+                                             user_id=message.from_user.id,
+                                             question_id=now_question.id,
+                                             is_pass=status).model_dump()
+        await UserProgressRepository().add_object(data=new_progress)
 
 
 async def go_to_under_chapters(message: types.Message, user_state):

@@ -39,6 +39,16 @@ class Theory(Base):
     message_id: Mapped[int] = mapped_column(Integer, nullable=True)
 
 
+class UserProgress(Base):
+    __tablename__ = 'user_progress'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    chapter: Mapped[str] = mapped_column(Text, nullable=False)
+    under_chapter: Mapped[str] = mapped_column(Text, nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    question_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_pass: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+
 class UserRepository(SQLAlchemyRepository):
     model = User
 
@@ -49,3 +59,7 @@ class TaskRepository(SQLAlchemyRepository):
 
 class TheoryRepository(SQLAlchemyRepository):
     model = Theory
+
+
+class UserProgressRepository(SQLAlchemyRepository):
+    model = UserProgress

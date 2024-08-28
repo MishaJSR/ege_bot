@@ -21,7 +21,11 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_fields(self, **kwargs) -> list[AlchemyDataObject]:
+    async def delete_fields(self, **kwargs):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_fields(self, **kwargs) -> list[AlchemyDataObject]:
         raise NotImplementedError
 
 
@@ -45,10 +49,17 @@ class SQLAlchemyRepository(AbstractRepository):
         res_values = [el._data for el in kwargs.get("result_query").fetchall()]
         return [AlchemyDataObject(kwargs.get("data"), value) for value in res_values]
 
-    async def delete_fields(self, **kwargs) -> list[AlchemyDataObject]:
+    async def delete_fields(self, **kwargs):
         conditions = [getattr(self.model, key) == value for key, value in kwargs.get("delete_filter").items()]
         async with async_session_maker() as session:
             stmt = delete(self.model).where(and_(*conditions)).returning(self.model.id)
             await session.execute(stmt)
             await session.commit()
 
+    async def update_fields(self, **kwargs):
+        conditions = [getattr(self.model, key) == value for key, value in kwargs.get("update_filter").items()]
+        async with async_session_maker() as session:
+            stmt = update(self.model).where(and_(*conditions)).values(**kwargs.get("update_data")).returning(self.model.id)
+            res = await session.execute(stmt)
+            await session.commit()
+            return res.fetchone()
