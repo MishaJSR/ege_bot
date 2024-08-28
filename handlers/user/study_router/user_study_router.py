@@ -110,7 +110,7 @@ async def user_press_answer_mode(message: types.Message, state: FSMContext):
         await state.set_state(UserStudyState.answer_mode)
     else:
         UserStudyState.questions = await get_questions(under_chapter=UserStudyState.select_under_chapter)
-        await message.answer(TEXT_INTRODUCE_TEST, reply_markup=ready_test_kb())
+        await message.answer(TEXT_INTRODUCE_TEST, reply_markup=ready_test_kb(), parse_mode=ParseMode.HTML)
         await state.set_state(UserStudyState.answer_prepare)
 
 
