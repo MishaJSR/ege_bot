@@ -40,7 +40,8 @@ async def user_press_start_train(message: types.Message, state: FSMContext):
 @user_main_router.message(Command("profile"))
 async def user_press_start_train(message: types.Message, state: FSMContext):
     percent, all_user_tasks, all_tasks, percent_ready, status = await count_statistic(message)
-    await send_status(message, status)
+    points = int(percent * percent_ready)
+    await send_status(message, status, points)
     await print_statistic(message, percent, all_user_tasks, all_tasks, percent_ready)
     await state.set_state(UserProfileState.start)
 
@@ -48,6 +49,7 @@ async def user_press_start_train(message: types.Message, state: FSMContext):
 @user_main_router.message(UserState.start, F.text == BUTTON_START_PREPARE_2)
 async def user_press_start_train(message: types.Message, state: FSMContext):
     percent, all_user_tasks, all_tasks, percent_ready, status = await count_statistic(message)
-    await send_status(message, status)
+    points = int(percent * percent_ready)
+    await send_status(message, status, points)
     await print_statistic(message, percent, all_user_tasks, all_tasks, percent_ready)
     await state.set_state(UserProfileState.start)

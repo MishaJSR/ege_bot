@@ -14,6 +14,7 @@ class User(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     username: Mapped[str] = mapped_column(Text, nullable=False)
     is_subscribe: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    points: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
 
 class Task(Base):

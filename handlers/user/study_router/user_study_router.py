@@ -17,7 +17,6 @@ user_study_router = Router()
 @user_study_router.message(StateFilter(UserStudyState), F.text == BACK_BUTTON)
 async def back_step_handler(message: types.Message, state: FSMContext) -> None:
     current_state = await state.get_state()
-    print(current_state)
 
     if current_state == UserStudyState.main_chapter:
         await state.set_state(UserState.start)
@@ -47,7 +46,8 @@ async def back_step_handler(message: types.Message, state: FSMContext) -> None:
             await state.set_state(previous)
             await message.answer(f"Вы вернулись к прошлому шагу")
             await message.answer(f"{UserStudyState.texts[previous.state][0]}",
-                                 reply_markup=UserStudyState.texts[previous.state][1]())
+                                 reply_markup=UserStudyState.texts[previous.state][1](),
+                                 parse_mode=ParseMode.HTML)
             return
         previous = step
 

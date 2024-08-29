@@ -7,6 +7,7 @@ class ConstructUser(BaseModel):
     user_id: conint(strict=True, gt=0)
     username: str
     is_subscribe: bool
+    points: Optional[int] = 0
 
 
 class ConstructTask(BaseModel):
@@ -33,3 +34,4 @@ class ConstructUserProgress(BaseModel):
     user_id: Optional[int]
     question_id: Optional[int]
     is_pass: bool
+

@@ -1,7 +1,7 @@
 import logging
 
 import sqlalchemy
-from sqlalchemy import select
+from sqlalchemy import select, desc
 
 from database.engine import async_session_maker
 from database.exeptions import CustomException
@@ -12,6 +12,7 @@ def async_session_maker_decorator_select(func):
         try:
             async with async_session_maker() as session:
                 field_filter = kwargs.get("field_filter")
+                order_filter = kwargs.get("order_filter")
                 data = kwargs.get("data")
                 distinct = kwargs.get("distinct")
                 if not kwargs.get("field_filter"):
@@ -22,7 +23,11 @@ def async_session_maker_decorator_select(func):
                     if distinct:
                         query = select(*[getattr(self_object.model, field) for field in data]).distinct()
                     else:
-                        query = select(*[getattr(self_object.model, field) for field in data])
+                        if order_filter:
+                            query = select(*[getattr(self_object.model, field) for field in data])\
+                                .order_by(desc(getattr(self_object.model, order_filter)))
+                        else:
+                            query = select(*[getattr(self_object.model, field) for field in data])
                 except AttributeError:
                     raise CustomException(message="Unknown fields in data")
                 try:

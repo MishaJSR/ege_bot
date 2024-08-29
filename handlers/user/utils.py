@@ -194,11 +194,26 @@ async def count_statistic(message: types.Message, flag="all", chapter=None, unde
     return percent, len(all_user_tasks), len(all_tasks), percent_ready, status
 
 
-async def send_status(message: types.Message, status):
+async def send_status(message: types.Message, status, points=0):
+    all_users = await UserRepository().get_all_by_fields(data=["id"])
     name = os.getcwd() + path_to_imgs + f"{status}.{imgs_format}"
     file = FSInputFile(name)
+    update_data = {
+        "points": points
+    }
+    update_filter = {
+        "user_id": message.from_user.id
+    }
+    my_user = await UserRepository().update_fields(update_data=update_data, update_filter=update_filter)
+    all_users = await UserRepository().get_all_by_fields(data=["points"], order_filter="points")
+    position_in_top = 1
+    for index, user in enumerate(all_users):
+        if user.points == points:
+            position_in_top = index + 1
     await message.answer_photo(photo=file, caption=f"<b>Вы достигли {levels_arr.index(status) + 1} уровня -"
-                                                   f" {status}</b>",
+                                                   f" {status}</b>\n"
+                                                   f"Вы заняли <b>{position_in_top} место из {len(all_users)}</b> "
+                                                   f"в общем топе учеников 🏆",
                                reply_markup=start_profile_kb(),
                                parse_mode=ParseMode.HTML)
 

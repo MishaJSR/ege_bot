@@ -121,6 +121,7 @@ CREATE TABLE public."user" (
     user_id bigint NOT NULL,
     username text NOT NULL,
     is_subscribe boolean NOT NULL,
+    points integer NOT NULL,
     updated timestamp without time zone NOT NULL
 );
 
@@ -221,7 +222,7 @@ ALTER TABLE ONLY public.user_progress ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-31a267f9ba00
+5e9b1c542106
 \.
 
 
@@ -1732,8 +1733,7 @@ COPY public.theory (id, under_chapter, photo_id, text, updated, message_id) FROM
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."user" (id, user_id, username, is_subscribe, updated) FROM stdin;
-11	548349299	Михаил	t	2024-08-26 10:59:41.050128
+COPY public."user" (id, user_id, username, is_subscribe, points, updated) FROM stdin;
 \.
 
 
@@ -1763,14 +1763,14 @@ SELECT pg_catalog.setval('public.theory_id_seq', 18, true);
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_id_seq', 11, true);
+SELECT pg_catalog.setval('public.user_id_seq', 5, true);
 
 
 --
 -- Name: user_progress_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_progress_id_seq', 17, true);
+SELECT pg_catalog.setval('public.user_progress_id_seq', 31, true);
 
 
 --
